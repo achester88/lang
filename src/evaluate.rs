@@ -6,7 +6,10 @@ pub mod specialforms;
 #[path = "parser.rs"]
 pub mod parser;
 
-use parser::{Expr};
+#[path = "expr.rs"]
+pub mod expr;
+
+use specialforms::expr::Expr;
 
 pub struct Specialforms<'a> {
   special_forms: specialforms::Specialforms<'a>
@@ -31,9 +34,11 @@ impl Specialforms<'_> {
       let operator = expr.operator.unwrap();
       let args = expr.args;
       let opval = operator.value.unwrap();
-      if operator.type_of == String::from("apply") && self.special_forms.map.contains_key(&opval.clone()) {
-        return self.special_forms.get(&opval)(args, scope);
+      if operator.type_of == String::from("word") && self.special_forms.map.contains_key(&*opval) {
+        return self.special_forms.get(&opval)(&args, &scope);
         //return specialForms[operator.name](expr.args, scope);
+      } else {
+        let op = self.evaluate(expr, scope);
       }
     }
     println!("Error at evaluate");
