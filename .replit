@@ -1,4 +1,4 @@
-run = ["cargo", "run", "test.egg"]
+run = ["cargo", "run", "test.regg"]
 
 entrypoint = "src/main.rs"
 

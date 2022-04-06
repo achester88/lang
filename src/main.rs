@@ -1,17 +1,21 @@
 //https://eloquentjavascript.net/12_language.html
+use std::collections::HashMap;
 
 use structopt::StructOpt;
 use anyhow::{Context, Result};
 use log::{info};//, warn};
 
-#[path = "parser.rs"]
-pub mod parser;
+//#[path = "parser.rs"]
+//mod parser;
 
-#[path = "evaluate.rs"]
-pub mod evaluate;
+//#[path = "evaluate.rs"]
+//mod evaluate;
 
-#[path = "specialforms.rs"]
-pub mod specialforms;
+//#[path = "specialforms.rs"]
+//mod specialforms;
+
+mod lang;
+use lang::*;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -43,6 +47,9 @@ fn main() -> Result<()> {
   //println!("{:#?}", parser::Parser::parse(&content));
   let special_forms = specialforms::Specialforms::new();
   let tree = parser::Parser::parse(&content);
+  let mut eval = evaluate::Evaluate { special_forms: special_forms};
+  let mut scope: HashMap<String, String> = HashMap::new();
+  eval.evaluate(tree, &mut scope);
   Ok(())
 }
 
