@@ -25,7 +25,7 @@ impl Specialforms<'_> {
 
 //---------------------------------------------------------
 //---------------------------------------------------------
-  pub fn out(mut eval: &mut evaluate::Evaluate<'_>, args: &Box<Option<Vec<Expr>>>, mut scope: &mut HashMap<String, String>) -> String {
+  pub fn out(eval: &mut evaluate::Evaluate<'_>, args: &Box<Option<Vec<Expr>>>, scope: &mut HashMap<String, String>) -> String {
     if args.as_ref().as_ref().unwrap().len() != (1 as usize) {
       println!("Incorrect number of args at out");
       panic!();
@@ -145,7 +145,7 @@ impl Specialforms<'_> {
         };
   }
 
-  pub fn type_of<T>(_: T) -> &'static str {
+  pub fn _type_of<T>(_: T) -> &'static str {
     type_name::<T>()
   }
 

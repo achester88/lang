@@ -11,12 +11,29 @@ use expr::Expr;
 
 pub struct Parser {
   //pub lexer: lexer::Lexer
+  pub temp: str
 }
 
 impl Parser {
 
-  pub fn parse(program: &str) -> Expr {
-    let (expr, rest) = Parser::parse_expression(program);
+  pub fn remove_comments(program: &str) -> String {
+    let mut arr: Vec<char> = program.chars().collect();
+    let mut i=0;
+    while i < arr.len()-1 {
+      if arr[i] == '/' && arr[i+1] == '/' {
+        while arr[i] !='\n' {
+          arr.remove(i);
+        }
+      }
+      i = i+1;
+    }
+    return arr.into_iter().collect();
+  }
+  
+  pub fn parse(mut program: String) -> Expr {
+    program = Parser::remove_comments(&program);
+    println!("_________After__________\n{}\n________________________", program.clone());
+    let (expr, rest) = Parser::parse_expression(&program);
     if Parser::skip_space(rest).len() > 0 {
       //println!("Unexpected text after program");
       panic!();

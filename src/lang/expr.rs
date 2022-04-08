@@ -11,7 +11,7 @@ pub struct Expr {
 }
 
 impl Expr  {
-  pub fn to_string(&self) -> String {
+  pub fn _to_string(&self) -> String {
     return format!("{{\ntype:{:?}\nop:{:?}\nargs:{:?}\nval:{:?}\n}}", self.type_of, self.operator, self.args, self.value);
   }
   

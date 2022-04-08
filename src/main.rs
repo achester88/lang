@@ -33,20 +33,10 @@ fn main() -> Result<()> {
     let path = args.path;//"test.txt";
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("could not read file `{}`", "path"))?;
-  /*
-    for line in content.lines() {
-    if line.contains(&args.pattern) {
-        println!("{}", line);
-    }
-  }
-*/
-  //print_type_of(&content.lines().join(""));
-  //let tokens = lexicalAnalysis::tokenization(&content);
-  //let mut lines = content.lines();
+
   println!("_________Source_________\n{}\n________________________", content);
-  //println!("{:#?}", parser::Parser::parse(&content));
   let special_forms = specialforms::Specialforms::new();
-  let tree = parser::Parser::parse(&content);
+  let tree = parser::Parser::parse(content);
   let mut eval = evaluate::Evaluate { special_forms: special_forms};
   let mut scope: HashMap<String, String> = HashMap::new();
   eval.evaluate(tree, &mut scope);

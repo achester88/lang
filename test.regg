@@ -1,6 +1,7 @@
 do(define(total, 0),
    define(count, 1),
-   while(<(count, 11),
+   while(<(count, 11), //comment
          do(define(total, +(total, count)),
+//comment
             define(count, +(count, 1)))),
    print(total))
