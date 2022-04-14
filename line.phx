@@ -1,2 +1,3 @@
-define x = 10;
-out(x);
+int y = 9;
+int x = 36 / y + 48 - 10 / 2;
+print(x);

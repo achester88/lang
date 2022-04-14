@@ -23,7 +23,7 @@ pub struct Evaluate<'a> {
 impl Evaluate<'_> {
   pub fn evaluate(&mut self, expr: Expr,  mut scope: &mut HashMap<String, String>) -> String {
   
-    if expr.type_of == String::from("value") {
+    if expr.get_type() == String::from("value") {
       return expr.value.unwrap();
     } else if expr.type_of == String::from("word") {
       let val = expr.value.unwrap();
@@ -35,11 +35,12 @@ impl Evaluate<'_> {
         println!("Undefined binding: ${}", val);
         panic!();
       }
-    } else if expr.type_of == String::from("apply") {
-      let operator = expr.operator.unwrap();
-      let args = expr.args;
+    } else if expr.get_type() == String::from("apply") {
+      let operator = expr.get_operator();
+      let args = expr.get_args();
       let opval = operator.value.unwrap();
       if operator.type_of == String::from("word") && self.special_forms.map.contains_key(&*opval) {
+        //println!("type: {:#?}", opval.clone());
         return self.special_forms.get(&opval)(self, &args, &mut scope);
         //return specialForms[operator.name](expr.args, scope);
       }
@@ -54,7 +55,7 @@ impl Evaluate<'_> {
     }
       
     }
-    println!("Error at evaluate");
+    println!("Error at evaluate type: {}", expr.get_type());
     panic!();
   }
 

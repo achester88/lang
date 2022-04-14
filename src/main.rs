@@ -1,4 +1,7 @@
+#![allow(dead_code)]
+#![allow(unused_mut)]
 //https://eloquentjavascript.net/12_language.html
+#[allow(unused_imports)]
 use std::collections::HashMap;
 
 use structopt::StructOpt;
@@ -34,11 +37,26 @@ fn main() -> Result<()> {
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("could not read file `{}`", "path"))?;
 
-  println!("_________Source_________\n{}\n________________________", content);
+  //println!("_________Source_________\n{}\n________________________", content);
+  /*
   let special_forms = specialforms::Specialforms::new();
   let tree = parser::Parser::parse(content);
   let mut eval = evaluate::Evaluate { special_forms: special_forms};
   let mut scope: HashMap<String, String> = HashMap::new();
+  eval.evaluate(tree, &mut scope);
+  */
+  let tok = tokenizer::Tokenizer::new();
+  let lex = lexer::Lexer::new();
+  let token_stream = tok.make_token(content);
+  //println!("{:#?}", token_stream);
+  let tree = lex.parse(token_stream);
+  //println!("{:#?}", tree);
+  let special_forms = specialforms::Specialforms::new();
+  
+  let mut eval = evaluate::Evaluate { special_forms: special_forms};
+  
+  let mut scope: HashMap<String, String> = HashMap::new();
+  
   eval.evaluate(tree, &mut scope);
   Ok(())
 }

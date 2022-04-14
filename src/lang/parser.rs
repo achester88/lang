@@ -15,7 +15,7 @@ pub struct Parser {
 }
 
 impl Parser {
-
+  
   pub fn remove_comments(program: &str) -> String {
     let mut arr: Vec<char> = program.chars().collect();
     let mut i=0;
