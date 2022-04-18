@@ -45,10 +45,11 @@ fn main() -> Result<()> {
   let mut scope: HashMap<String, String> = HashMap::new();
   eval.evaluate(tree, &mut scope);
   */
+  // /*
   let tok = tokenizer::Tokenizer::new();
   let lex = lexer::Lexer::new();
   let token_stream = tok.make_token(content);
-  //println!("{:#?}", token_stream);
+ // println!("{:#?}", token_stream);
   let tree = lex.parse(token_stream);
   //println!("{:#?}", tree);
   let special_forms = specialforms::Specialforms::new();
@@ -58,6 +59,7 @@ fn main() -> Result<()> {
   let mut scope: HashMap<String, String> = HashMap::new();
   
   eval.evaluate(tree, &mut scope);
+  //*/
   Ok(())
 }
 

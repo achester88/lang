@@ -42,6 +42,15 @@ impl Expr  {
       value: Box::new(Some(String::from(val)))
     };
   }
+
+  pub fn sp_value(val: &str, kind: &str) -> Self {
+    return Self {
+      type_of: String::from("value"),
+      operator: Box::new(Some(Expr::value(kind))),
+      args: Box::new(None),
+      value: Box::new(Some(String::from(val)))
+    };
+  }
   
   pub fn word(val: &str) -> Self {
     return Self {

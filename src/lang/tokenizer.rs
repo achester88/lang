@@ -24,6 +24,7 @@ impl Tokenizer {
       }
       i = i+1;
     }
+    
     return arr.into_iter().collect();
   }
 
@@ -33,27 +34,16 @@ impl Tokenizer {
     let mut arr: Vec<char> = input.chars().collect();
     let mut i=0;
     while i < arr.len() {
-      if arr[i] == '(' || arr[i] == ')' || arr[i] == '\n' {
+      if arr[i] == '(' || arr[i] == ')' {
           //arr.remove(i);
           arr[i] = ' ';
         
+      } else if arr[i] == '\n' {
+        arr.remove(i);
       }
       i = i+1;
     }
     return arr.into_iter().collect();
-  }
-
-
-  pub fn remove_empty(mut input: Vec<&str>) -> Vec<&str> {
-    let mut i=0;
-    while i < input.len() {
-      if input[i] == "" {
-          input.remove(i);
-        
-      }
-      i = i+1;
-    }
-    return input;
   }
 
   pub fn make_expr(input: &str) -> Expr {
@@ -64,7 +54,7 @@ impl Tokenizer {
     let is_string = Regex::new(r#"^"([^"]*)""#).unwrap();
     let is_number = Regex::new(r#"^\d+\b"#).unwrap();
     let is_word = Regex::new(r#"^[^\s(),#"]+"#).unwrap();
-
+    
     //Match Strings ex: "text"
      mat = is_string.find_iter(input).map(|x| x.as_str()).collect();
     if mat.len() > 0 {
@@ -76,7 +66,7 @@ impl Tokenizer {
       if mat.len() > 0 {
         return Expr::value(mat[0]);
       } else {
-        //Match Numbers ex: 10
+        //Match words ex: print
         mat = is_word.find_iter(input).map(|x| x.as_str()).collect();
         if mat.len() > 0 {
 
@@ -86,6 +76,7 @@ impl Tokenizer {
           let math = ["+", "-", "*", "/"];
           let comp = ["==", "!=", "<", "<=", ">", ">="];
           let log = ["&&", "||", "!"];
+          let bool = ["true", "false"];
           
           if punc.contains(&mat[0]) {
             return Expr::sp_word(mat[0], "punc");
@@ -105,6 +96,9 @@ impl Tokenizer {
           if math.contains(&mat[0]) {
             return Expr::sp_word(mat[0], "math");
           }
+          if bool.contains(&mat[0]) {
+            return Expr::sp_value(mat[0], "bool");
+          }
           return Expr::word(mat[0]);
         } else {
           println!("Unexpected syntax: |{}|", input);
@@ -115,28 +109,106 @@ impl Tokenizer {
       }
     }
   }
+
+  pub fn make_words(line: &str) -> Vec<String> {
+    
+    let mut in_string = false;
+    let mut in_space = false;
+    let mut words: Vec<Vec<char>> = Vec::new();
+    let mut cw = 0;
+    let cha: Vec<char> = line.chars().collect::<Vec<char>>();
+    let mut i = 0;
+    while i<cha.len() {
+      let c = cha[i];
+      if in_space && !in_string {
+        if c != ' ' {
+          in_space = false;
+          if c == '"' {
+          if !in_string {
+            cw = cw + 1;
+            words.push(Vec::new());
+            words[cw-1].push(c);
+          } else {
+            words[cw-1].push(c);
+            //prevents start new block at end of line
+            if !(i == cha.len()-1) {
+            cw = cw + 1;
+            words.push(Vec::new());
+            }
+          }
+          in_string = !in_string;
+          
+        } else {
+          words.push(Vec::new());
+          cw = cw + 1;
+          words[cw-1].push(c);
+          }
+        }
+      } else { 
+        if c == ' ' && !in_string {
+          in_space = true;
+        } else if c == '"' {
+          if !in_string {
+            cw = cw + 1;
+            words.push(Vec::new());
+            words[cw-1].push(c);
+          } else {
+            words[cw-1].push(c);
+            //prevents start new block at end of line
+            if !(i == cha.len()-1) {
+            cw = cw + 1;
+            words.push(Vec::new());
+            }
+          }
+          in_string = !in_string;
+          
+        } else {
+        if words.len() == 0 {
+          cw = cw + 1;
+          words.push(Vec::new());
+        }
+        words[cw-1].push(c);
+          
+        }
+      }
+      i = i + 1;
+    }
+
+    if words[words.len()-1].len() == 0 {
+      words.remove(words.len()-1);
+    }
+    
+    let mut fin: Vec<String> = Vec::new();
+    for l in words {
+      let temp = l.iter().collect::<String>();
+      fin.push(temp);
+    }
+    return fin.clone();
+  }
+
   
   pub fn make_token(self, mut soruce: String) -> Vec<Vec<Expr>> {
-
-    
+  
     let comment_free = Tokenizer::remove_comments(soruce);
     let par_free = Tokenizer::remove_par(comment_free);
     let lines: Vec<&str> = par_free.split(";").collect();
-    
     let mut lines_expr: Vec<Vec<Expr>> = Vec::new();
     let mut l = 0;
-    
     while l<lines.len() {
       let line = lines[l];
+      
+      if line != "" {
       let mut line_expr: Vec<Expr> = Vec::new();
       //println!("{}", line);
-      let words: Vec<&str> = Tokenizer::remove_empty(line.split(" ").collect());
+      let words: Vec<String> = Tokenizer::make_words(line);
       if words.len() > 1 {
+        //println!("words: {:#?}", words);
         for w in words {
-          line_expr.push(Tokenizer::make_expr(w));
+          line_expr.push(Tokenizer::make_expr(&w));
         }
         
         lines_expr.push(line_expr);
+      }
       }
       l = l + 1;
     }

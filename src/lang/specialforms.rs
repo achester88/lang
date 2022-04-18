@@ -1,3 +1,6 @@
+use std::io;
+use std::io::Write; // <--- bring flush() into scope
+
 use std::collections::HashMap;
 use std::any::type_name;
 
@@ -25,6 +28,24 @@ impl Specialforms<'_> {
 
 //---------------------------------------------------------
 //---------------------------------------------------------
+  pub fn outln(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
+    if args.len() != (1 as usize) {
+      println!("Incorrect number of args at out");
+      panic!();
+    }
+    //let elm_expr = &args.as_ref().as_ref().unwrap()[0];
+    //let val = elm_expr.value.as_ref().as_ref().unwrap();
+    let raw = eval.evaluate(args[0].clone(), scope);
+    if raw.contains('"') {
+      let mes = &raw[1..raw.len()-1];
+      print!("{}", mes);
+    } else {
+      print!("{}", raw);
+    }
+
+    return String::from("true");
+  }
+
   pub fn out(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
     if args.len() != (1 as usize) {
       println!("Incorrect number of args at out");
@@ -32,7 +53,14 @@ impl Specialforms<'_> {
     }
     //let elm_expr = &args.as_ref().as_ref().unwrap()[0];
     //let val = elm_expr.value.as_ref().as_ref().unwrap();
-    println!("{}", eval.evaluate(args[0].clone(), scope));
+    let raw = eval.evaluate(args[0].clone(), scope);
+    if raw.contains('"') {
+      let mes = &raw[1..raw.len()-1];
+      print!("{}", mes);
+    } else {
+      print!("{}", raw);
+    }
+    io::stdout().flush().unwrap();
     return String::from("true");
   }
 
@@ -79,6 +107,17 @@ impl Specialforms<'_> {
     return value;
   }
 
+  pub fn fnbool(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
+     if args.len() != (2 as usize) || args[0].type_of != "word" {
+      println!("Incorrect number of args at define");
+      panic!();
+    }
+    let value = eval.evaluate(args[1].clone(), scope);
+    let name = args[0].get_value();
+    scope.insert(String::from(name), value.clone());
+    return value;
+  }
+  
   pub fn fnadd(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
     
     let (i1, i2) = Specialforms::check(eval, args, scope);
@@ -152,11 +191,14 @@ impl Specialforms<'_> {
 
   pub fn new() -> Self {
     let mut temp: HashMap<_, fn(&mut evaluate::Evaluate<'_>, &Vec<Expr>, &mut HashMap<String, String>) -> String> = HashMap::new();
+  
     temp.insert("print",   Specialforms::out);
+    temp.insert("println",   Specialforms::outln);
     temp.insert("if",    Specialforms::fnif);
     temp.insert("while", Specialforms::fnwhile);
     temp.insert("do", Specialforms::fndo);
     temp.insert("int", Specialforms::fnint);
+    temp.insert("bool", Specialforms::fnbool);
     temp.insert("+", Specialforms::fnadd);
     temp.insert("-", Specialforms::fnsub);
     temp.insert("*", Specialforms::fnmut);
