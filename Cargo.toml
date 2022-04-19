@@ -1,6 +1,6 @@
 [package]
 name = "phoenix"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["achester88<anthonychester71@gmail.com>"]
 edition = "2021"
 
