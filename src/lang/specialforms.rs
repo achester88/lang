@@ -38,9 +38,9 @@ impl Specialforms<'_> {
     let raw = eval.evaluate(args[0].clone(), scope);
     if raw.contains('"') {
       let mes = &raw[1..raw.len()-1];
-      print!("{}", mes);
+      println!("{}", mes);
     } else {
-      print!("{}", raw);
+      println!("{}", raw);
     }
 
     return String::from("true");
@@ -65,14 +65,15 @@ impl Specialforms<'_> {
   }
 
   pub fn fnif(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope:   &mut HashMap<String, String>) -> String {
-    if args.len() != (3 as usize) {
+    if args.len() != (2 as usize) {
       println!("Incorrect number of args at if");
       panic!();
-    } else if eval.evaluate(args[0].clone(), scope) != "false" {
-      return  eval.evaluate(args[1].clone(), scope);
-    } else {
+    } else if eval.evaluate(args[0].clone(), scope) == "true" {
+      return eval.evaluate(args[1].clone(), scope);
+    } /* else {
       return  eval.evaluate(args[2].clone(), scope);
-    }
+    } */
+    return String::from("false");
   }
 
   pub fn fnwhile(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
@@ -157,14 +158,61 @@ impl Specialforms<'_> {
     let (i1, i2) = Specialforms::check(eval, args, scope);
     return (i1 < i2).to_string();
   }
-  
+
+  pub fn fnand(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
+    
+    if args.len() != (2 as usize) {
+      println!("Incorrect number of args at define");
+      panic!();
+    }
+    
+    let arg1 = eval.evaluate(args[0].clone(), scope);
+    let arg2 = eval.evaluate(args[1].clone(), scope);
+    if arg1 == String::from("true") &&  arg2 == String::from("true") {
+      return String::from("true");
+    } else {
+      return String::from("false");
+    }
+  }
+
+  pub fn fnor(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
+    
+    if args.len() != (2 as usize) {
+      println!("Incorrect number of args at define");
+      panic!();
+    }
+    
+    let arg1 = eval.evaluate(args[0].clone(), scope);
+    let arg2 = eval.evaluate(args[1].clone(), scope);
+    if arg1 == String::from("true") || arg2 == String::from("true") {
+      return String::from("true");
+    } else {
+      return String::from("false");
+    }
+  }
+
+  pub fn fnnot(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
+    
+    if args.len() != (1 as usize) {
+      println!("Incorrect number of args at define");
+      panic!();
+    }
+    
+    let arg1 = eval.evaluate(args[0].clone(), scope);
+    if !(arg1 == String::from("true")) {
+      return String::from("true");
+    } else {
+      return String::from("false");
+    }
+  }
+
 //---------------------------------------------------------
 //---------------------------------------------------------
 
   pub fn check(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> (i32, i32) {
     
     if args.len() != (2 as usize) {
-      println!("Incorrect number of args at define");
+      println!("Incorrect number of args at math op");
       panic!();
     }
     
@@ -177,6 +225,7 @@ impl Specialforms<'_> {
     }
     return (arg1.parse::<i32>().unwrap(), arg2.parse::<i32>().unwrap());
   }
+
   
   pub fn get(&self, s: &str) -> fn(&mut evaluate::Evaluate<'_>, &Vec<Expr>, &mut HashMap<String, String>) -> String {
     match self.map.get(s) {
@@ -184,10 +233,7 @@ impl Specialforms<'_> {
             None => panic!(),
         };
   }
-
-  pub fn _type_of<T>(_: T) -> &'static str {
-    type_name::<T>()
-  }
+  
 
   pub fn new() -> Self {
     let mut temp: HashMap<_, fn(&mut evaluate::Evaluate<'_>, &Vec<Expr>, &mut HashMap<String, String>) -> String> = HashMap::new();
@@ -195,6 +241,7 @@ impl Specialforms<'_> {
     temp.insert("print",   Specialforms::out);
     temp.insert("println",   Specialforms::outln);
     temp.insert("if",    Specialforms::fnif);
+    temp.insert("while", Specialforms::fnwhile);
     temp.insert("while", Specialforms::fnwhile);
     temp.insert("do", Specialforms::fndo);
     temp.insert("int", Specialforms::fnint);
@@ -206,6 +253,9 @@ impl Specialforms<'_> {
     temp.insert("==", Specialforms::fneq);
     temp.insert("<", Specialforms::fnlt);
     temp.insert(">", Specialforms::fngt);
+    temp.insert("&&", Specialforms::fnand);
+    temp.insert("||", Specialforms::fnor);
+    temp.insert("!", Specialforms::fnnot);
 
     return Self {map: temp};
   }

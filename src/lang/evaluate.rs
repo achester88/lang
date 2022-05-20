@@ -43,8 +43,10 @@ impl Evaluate<'_> {
         //println!("type: {:#?}", opval.clone());
         return self.special_forms.get(&opval)(self, &args, &mut scope);
         //return specialForms[operator.name](expr.args, scope);
-      }
-      else {
+      } else {
+        println!("|{}| not in special froms", &*opval);
+        println!("is {}", self.special_forms.map.contains_key(&*opval));
+        panic!();
       //let op = self.evaluate(operator, scope);
       /*if (typeof op == "function") {
         return op(...args.map(arg => evaluate(arg, scope)));

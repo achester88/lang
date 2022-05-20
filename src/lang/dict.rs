@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use crate::expr;
+use crate::lexer;
 use expr::*;
 
 pub struct Dict<'a> {
@@ -73,21 +74,104 @@ impl Dict<'_> {
     if part.len() == 1 {
       if !part[0].operator.is_none() {
         
-        
-      if part[0].get_operator().get_value() == "bool" || 
-         part[0].get_operator().get_value() == "comp" {
+      if part[0].get_operator().get_value() == "bool" || part[0].get_operator().get_operator().get_value() == "comp" {
         return part[0].clone();
         }
       }
       println!("Error at value_bool");
       panic!();
     }
-    return Expr::apply(part[1].clone(), 
-                       [ 
-                         part[0].clone(), 
-                         part[2].clone() 
-                       ].to_vec()
-                      )
+
+  if part.len() == 2 {
+    if !part[0].operator.is_none() {
+      if part[0].get_value() == "!" {
+        return Expr::apply(
+           part[0].clone(),
+          vec![part[1].clone()]
+        );
+      }
+    }
+    println!("Error at value_bool");
+    panic!();
+  }
+
+    let mut op: Vec<&str> = Vec::new();
+    let mut index: Vec<usize> = Vec::new();
+    let mut i = part.len()-1;
+    let mut ao_op = false;
+    while i>0 {
+      //println!("run: {:#?}", part);
+        let expr = part[i].clone();
+      if !expr.operator.is_none()  {
+        if expr.get_operator().get_value() == "comp" || expr.get_operator().get_value() == "log" {
+          if ["&&", "||"].contains(&expr.get_value()) {
+            if ao_op {
+              op.push(part[i].get_value());
+              index.push(i);
+            } else {
+              ao_op = true;
+              op = Vec::new();
+              index = Vec::new();
+              op.push(part[i].get_value());
+              index.push(i);
+            }
+          } else if !ao_op {
+          op.push(part[i].get_value());
+          index.push(i);
+          }
+          
+        }
+      }
+        i = i - 1;
+      }
+      let l = index[index.len()/2];
+      if ao_op {
+        return Expr::apply(
+                part[l].clone(),
+                Vec::from([
+                   Dict::value_bool(part[..l].to_vec()),
+                  Dict::value_bool(part[l+1..].to_vec())
+                ])
+              );
+      } else {
+        let mut new_part: Vec<Expr> = Vec::new();
+        i = 0;
+        let is_not = ["!"].contains(&part[l].get_value());
+        while i<part.len() {
+          if i ==l-1 {
+            if is_not {
+              new_part.push(part[i].clone());
+            }
+          }
+          else if i==l+1 {
+          } else if i==l {
+            let apply;
+            if is_not {
+            apply = Expr::apply(
+                part[l].clone(),
+                Vec::from([
+                   part[l+1].clone()
+                ])
+              );
+            } else {
+            apply = Expr::apply(
+                part[l].clone(),
+                Vec::from([
+                  part[l-1].clone(),
+                   part[l+1].clone()
+                ])
+              );
+            }
+            new_part.push(apply.clone());
+          } else {
+            new_part.push(part[i].clone());
+          }
+          i = i + 1;
+        }
+        return Dict::value_bool(new_part);
+      }
+      
+
   }
 //-----------------------------------------------------------------------
   
@@ -123,6 +207,22 @@ impl Dict<'_> {
     return Expr::apply(Expr::word("println"), Vec::from([args[1].clone()]));
   }
 
+  pub fn fnif(args: Vec<Expr>) -> Expr {
+    let bool = Dict::value_bool(args[1..args.len()-1].to_vec());
+    return Expr::apply(
+      Expr::word("if"),
+      vec![ bool, args[args.len()-1].clone() ]
+    );
+  }
+  pub fn fnwhile(args: Vec<Expr>) -> Expr {
+    println!("{:#?}", args[1..args.len()-1].to_vec());
+    let bool = Dict::value_bool(args[1..args.len()-1].to_vec());
+    return Expr::apply(
+      Expr::word("while"),
+      vec![ bool, args[args.len()-1].clone() ]
+    );
+  }
+
 //-----------------------------------------------------------------------
 
   
@@ -144,6 +244,8 @@ impl Dict<'_> {
     temp.insert("bool", (Dict::fnbool, 4));
     temp.insert("print", (Dict::fnout, 2));
     temp.insert("println", (Dict::fnoutln, 2));
+    temp.insert("if", (Dict::fnif, 2));
+    temp.insert("while", (Dict::fnwhile, 2));
     return Self {map: temp};
   }
   

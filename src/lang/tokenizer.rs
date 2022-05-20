@@ -74,8 +74,8 @@ impl Tokenizer {
           let asgmt = ["="];
           let sasgmt = ["+=", "/=", "*=", "-="];
           let math = ["+", "-", "*", "/"];
-          let comp = ["==", "!=", "<", "<=", ">", ">="];
-          let log = ["&&", "||", "!"];
+          let comp = ["==", "!=", "<", "<=", ">", ">=", "!"];
+          let log = ["&&", "||"];
           let bool = ["true", "false"];
           
           if punc.contains(&mat[0]) {
@@ -194,20 +194,45 @@ impl Tokenizer {
     let lines: Vec<&str> = par_free.split(";").collect();
     let mut lines_expr: Vec<Vec<Expr>> = Vec::new();
     let mut l = 0;
+    let mut in_par = false;
+    let mut temp_line: Vec<Expr> = vec![];
+    let mut temp: Vec<Expr> = vec![];
     while l<lines.len() {
       let line = lines[l];
       
       if line != "" {
       let mut line_expr: Vec<Expr> = Vec::new();
-      //println!("{}", line);
       let words: Vec<String> = Tokenizer::make_words(line);
-      if words.len() > 1 {
-        //println!("words: {:#?}", words);
+      if words.len() > 0 {
         for w in words {
-          line_expr.push(Tokenizer::make_expr(&w));
+          
+          if w == "{" || w == "}" {
+            if in_par {
+              for l in temp_line {
+                line_expr.push(l);
+              }
+              line_expr.push(Expr::apply(
+                Expr::word("do"),
+                temp.clone()
+              ));
+              lines_expr.push(line_expr);
+              line_expr = vec!();
+              temp = vec!();
+              temp_line = vec!();
+            } else {
+              temp_line = line_expr.clone();
+            }
+            in_par = !in_par;
+          } else if in_par {
+            temp.push(Tokenizer::make_expr(&w));
+          } else {
+            line_expr.push(Tokenizer::make_expr(&w));
+          }
         }
-        
+
+        if !in_par {
         lines_expr.push(line_expr);
+        }
       }
       }
       l = l + 1;

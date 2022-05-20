@@ -1,3 +1,8 @@
-bool z = true;
-print("z: ");
-println(z);
+println("done!");
+int i = 1;
+if 6 > 5 {
+  println("is");
+} 
+while i > 0 {
+  println(i);
+} 

@@ -24,6 +24,15 @@ impl Expr  {
   pub fn get_operator(&self) -> Expr {
     return self.operator.as_ref().as_ref().unwrap().clone();
   }
+
+  pub fn type_do(args: Vec<Expr>) -> Self {
+    return Self {
+      type_of: String::from("do"),
+      operator: Box::new(Some(Expr::word("do"))),
+      args: Box::new(Some(args)),
+      value: Box::new(Some(String::from("do")))
+    }; 
+  }
   
   pub fn apply(op: Expr, args: Vec<Expr>) -> Self {
     return Self {

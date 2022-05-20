@@ -49,9 +49,9 @@ fn main() -> Result<()> {
   let tok = tokenizer::Tokenizer::new();
   let lex = lexer::Lexer::new();
   let token_stream = tok.make_token(content);
- // println!("{:#?}", token_stream);
-  let tree = lex.parse(token_stream);
-  //println!("{:#?}", tree);
+  println!("{:#?}", token_stream);
+  let tree = lex.tree(token_stream);
+  println!("{:#?}", tree);
   let special_forms = specialforms::Specialforms::new();
   
   let mut eval = evaluate::Evaluate { special_forms: special_forms};
