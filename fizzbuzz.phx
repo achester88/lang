@@ -1,0 +1,16 @@
+int i = 1;
+while(i < 101) {
+  int five = i % 5;
+  int three = i % 3;
+  if (!five == 0 && !three == 0) {
+    print(i)
+  }
+  if (three == 0) {
+    print("Fizz")
+  }
+  if (five == 0) {
+    print("Buzz")
+  }
+  println("")
+  int i = i + 1;
+}

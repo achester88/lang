@@ -1,8 +1,8 @@
-
+use std::fmt;
 //#[derive()]
 
   
-#[derive(Debug, Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Expr {
   pub type_of: String,
   pub operator: Box<Option<Expr>>,
@@ -102,3 +102,25 @@ impl Expr  {
     }
 }
   
+impl fmt::Debug for Expr {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    let type_of = self.get_type();
+    let mut op: String  = "".to_owned();
+    let mut t;
+    if !self.operator.is_none() {
+      t = self.get_operator();
+       let s: String = t.get_value().to_owned();
+      op = s + ", ";
+    }
+    let mut args = vec!();
+    if !self.args.is_none() {
+      args = self.get_args();
+    }
+    let mut val: String = "".to_owned();
+    if !self.value.is_none() {
+      let s: String = self.get_value().to_owned();
+      val = s + ", ";
+    }
+    write!(f, "{{ {}{}, {}agrs{:#?} }}", val, type_of, op, args)
+  }  
+}

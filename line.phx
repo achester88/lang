@@ -1,8 +1,7 @@
-println("done!");
-int i = 1;
-if 6 > 5 {
-  println("is");
-} 
-while i > 0 {
-  println(i);
-} 
+int x = 0;
+while(x < 10) {
+  if(x < 7) {
+    println(x);
+  };
+  int x = x + 1;
+}

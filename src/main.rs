@@ -1,66 +1,50 @@
 #![allow(dead_code)]
 #![allow(unused_mut)]
-//https://eloquentjavascript.net/12_language.html
 #[allow(unused_imports)]
 use std::collections::HashMap;
 
-use structopt::StructOpt;
 use anyhow::{Context, Result};
-use log::{info};//, warn};
+use log::info;
+use structopt::StructOpt;
 
-//#[path = "parser.rs"]
-//mod parser;
-
-//#[path = "evaluate.rs"]
-//mod evaluate;
-
-//#[path = "specialforms.rs"]
-//mod specialforms;
+use std::panic;
 
 mod lang;
 use lang::*;
 
 #[derive(StructOpt)]
 struct Cli {
-    /// The pattern to look for
-    //pattern: String,
-    /// The path to the file to read
     #[structopt(parse(from_os_str))]
     path: std::path::PathBuf,
 }
 
 fn main() -> Result<()> {
+    // /*
+    panic::set_hook(Box::new(|_info| {
+        // do nothing
+    }));
+    // */
     env_logger::init();
     info!("starting up");
     let args = Cli::from_args();
-    let path = args.path;//"test.txt";
+    let path = args.path;
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("could not read file `{}`", "path"))?;
+  
+    let mut tok = tokenizer::Tokenizer::new(content);
+    let token_stream = tok.make_tokens();// create preprocesser to check that all ( and { have matches and for () to make bool or int
+    //println!("ts {:#?}", token_stream);
+    let mut lex = lexer::Lexer::new(token_stream);
+    let tree = lex.tree();
+    //println!("tr {:?}", tree);
+    let special_forms = specialforms::Specialforms::new();
 
-  //println!("_________Source_________\n{}\n________________________", content);
-  /*
-  let special_forms = specialforms::Specialforms::new();
-  let tree = parser::Parser::parse(content);
-  let mut eval = evaluate::Evaluate { special_forms: special_forms};
-  let mut scope: HashMap<String, String> = HashMap::new();
-  eval.evaluate(tree, &mut scope);
-  */
-  // /*
-  let tok = tokenizer::Tokenizer::new();
-  let lex = lexer::Lexer::new();
-  let token_stream = tok.make_token(content);
-  println!("{:#?}", token_stream);
-  let tree = lex.tree(token_stream);
-  println!("{:#?}", tree);
-  let special_forms = specialforms::Specialforms::new();
-  
-  let mut eval = evaluate::Evaluate { special_forms: special_forms};
-  
-  let mut scope: HashMap<String, String> = HashMap::new();
-  
-  eval.evaluate(tree, &mut scope);
-  //*/
-  Ok(())
+    let mut eval = evaluate::Evaluate {
+        special_forms: special_forms,
+    };
+
+    let mut scope: HashMap<String, String> = HashMap::new();
+
+    eval.evaluate(tree, &mut scope); // for each value check if needed +-/* or bool
+    Ok(())
 }
-
-//args, scope

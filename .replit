@@ -1,4 +1,3 @@
-#run = ["cargo", "run", "test.regg"]
 run = ["cargo", "run", "line.phx"]
 
 entrypoint = "src/main.rs"

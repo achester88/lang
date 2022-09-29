@@ -2,7 +2,6 @@ use std::io;
 use std::io::Write; // <--- bring flush() into scope
 
 use std::collections::HashMap;
-use std::any::type_name;
 
 //use crate::parser;
 use crate::expr;
@@ -140,12 +139,24 @@ impl Specialforms<'_> {
     let (i1, i2) = Specialforms::check(eval, args, scope);
     return (i1 / i2).to_string();
   }
+
+  pub fn fnmod(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
+    
+    let (i1, i2) = Specialforms::check(eval, args, scope);
+    return (i1 % i2).to_string();
+  }
   
   
   pub fn fneq(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
     
     let (i1, i2) = Specialforms::check(eval, args, scope);
     return (i1 == i2).to_string();
+  }
+
+  pub fn fnneq(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {
+    
+    let (i1, i2) = Specialforms::check(eval, args, scope);
+    return (i1 != i2).to_string();
   }
   
   pub fn fngt(eval: &mut evaluate::Evaluate<'_>, args: &Vec<Expr>, scope: &mut HashMap<String, String>) -> String {             
@@ -250,7 +261,9 @@ impl Specialforms<'_> {
     temp.insert("-", Specialforms::fnsub);
     temp.insert("*", Specialforms::fnmut);
     temp.insert("/", Specialforms::fndiv);
+    temp.insert("%", Specialforms::fnmod);
     temp.insert("==", Specialforms::fneq);
+    temp.insert("!=", Specialforms::fnneq);
     temp.insert("<", Specialforms::fnlt);
     temp.insert(">", Specialforms::fngt);
     temp.insert("&&", Specialforms::fnand);

@@ -39,13 +39,13 @@ impl Evaluate<'_> {
       let operator = expr.get_operator();
       let args = expr.get_args();
       let opval = operator.value.unwrap();
-      if operator.type_of == String::from("word") && self.special_forms.map.contains_key(&*opval) {
+      if self.special_forms.map.contains_key(&*opval) {
         //println!("type: {:#?}", opval.clone());
         return self.special_forms.get(&opval)(self, &args, &mut scope);
         //return specialForms[operator.name](expr.args, scope);
       } else {
         println!("|{}| not in special froms", &*opval);
-        println!("is {}", self.special_forms.map.contains_key(&*opval));
+        println!("is {:#?}", expr.get_operator());
         panic!();
       //let op = self.evaluate(operator, scope);
       /*if (typeof op == "function") {

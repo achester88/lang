@@ -1,245 +1,237 @@
-use regex::Regex;
+use crate::errorhandler;
 use crate::expr;
+use errorhandler::ErrorHandler;
 use expr::Expr;
+use regex::Regex;
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Type {
+    String = 0,
+    Number = 1,
+    Punc = 2,
+    Asgmt = 3,
+    Par = 4,
+    Sasgmt = 5,
+    Comp = 6,
+    Log = 7,
+    Math = 8,
+    Bool = 9,
+    Word = 10,
+    Ctrl = 11,
+    Key = 12,
+    NEWL = 13,
+    Null = 14,
+}
 
 pub struct Tokenizer {
+    pub i: usize,
+    pub char: Vec<char>,
+    pub lines_expr: Vec<Expr>,
+    pub current: Vec<char>,
+    pub current_type: Type,
+    pub is_string: bool,
+    pub error_handler: ErrorHandler,
 }
 
 impl Tokenizer {
+    pub fn new(soruce: String) -> Self {
+        let char: Vec<char> = soruce.chars().collect();
+        let c = char[0];
+        let ct = Type::Null; //self.get_type(&c.to_string());
+        return Self {
+            i: 1,
+            char: char,
+            lines_expr: vec![],
+            current: vec![c],
+            current_type: ct,
+            is_string: false,
+            error_handler: ErrorHandler::new(1,0, String::from("Tokenizer")),
+        };
+    }
 
-  
-  pub fn new() -> Self {
+    pub fn make_expr(&mut self, input: &str) -> Expr {
+        let tp = self.get_type(input);
+        return match tp {
+            Type::String => Expr::value(input),
+            Type::Number => Expr::value(input),
+            Type::Punc => Expr::sp_word(input, "punc"),
+            Type::Asgmt => Expr::sp_word(input, "asgmt"),
+            Type::Par => Expr::sp_value(input, "par"),
+            Type::Sasgmt => Expr::sp_word(input, "sasgmt"),
+            Type::Comp => Expr::sp_word(input, "comp"),
+            Type::Log => Expr::sp_word(input, "log"),
+            Type::Math => Expr::sp_word(input, "math"),
+            Type::Bool => Expr::sp_value(input, "bool"),
+            Type::Ctrl => Expr::sp_word(input, "ctrl"),
+            Type::Key => Expr::sp_value(input, "key"),
+            _ => Expr::word(input),
+        };
+    }
 
-    return Self {};
-  }
+    pub fn get_type(&mut self, input: &str) -> Type {
+        let mut mat: Vec<&str>;
+        let is_number = Regex::new(r#"^\d+\b"#).unwrap();
+        let is_word = Regex::new(r#"^[^\s,#"]+"#).unwrap();
 
-  pub fn remove_comments(input: String) -> String {
-    let mut arr: Vec<char> = input.chars().collect();
-    let mut i=0;
-    while i < arr.len() {
-      if arr[i] == '/' && arr[i+1] == '/' {
-        while arr[i] !='\n' {
-          arr.remove(i);
+        if input == "\n" {
+            return Type::NEWL;
         }
-      }
-      i = i+1;
-    }
-    
-    return arr.into_iter().collect();
-  }
 
-
-  
-  pub fn remove_par(input: String) -> String {
-    let mut arr: Vec<char> = input.chars().collect();
-    let mut i=0;
-    while i < arr.len() {
-      if arr[i] == '(' || arr[i] == ')' {
-          //arr.remove(i);
-          arr[i] = ' ';
-        
-      } else if arr[i] == '\n' {
-        arr.remove(i);
-      }
-      i = i+1;
-    }
-    return arr.into_iter().collect();
-  }
-
-  pub fn make_expr(input: &str) -> Expr {
-    let mut mat: Vec<&str>;//, expr;
-    //let mut expr: Expr =  Expr {type_of: String::from(""), value: String::from("")};
-    //r#""#
-    //^"([^"]*)"
-    let is_string = Regex::new(r#"^"([^"]*)""#).unwrap();
-    let is_number = Regex::new(r#"^\d+\b"#).unwrap();
-    let is_word = Regex::new(r#"^[^\s(),#"]+"#).unwrap();
-    
-    //Match Strings ex: "text"
-     mat = is_string.find_iter(input).map(|x| x.as_str()).collect();
-    if mat.len() > 0 {
-      //println!("{:#?}", mat);
-      return Expr::value(mat[0]);
-    } else {
-      //Match Numbers ex: 10
-      mat = is_number.find_iter(input).map(|x| x.as_str()).collect();
-      if mat.len() > 0 {
-        return Expr::value(mat[0]);
-      } else {
+        //Match Numbers ex: 10
+        mat = is_number.find_iter(input).map(|x| x.as_str()).collect();
+        if mat.len() > 0 {
+            return Type::Number;
+        }
         //Match words ex: print
         mat = is_word.find_iter(input).map(|x| x.as_str()).collect();
         if mat.len() > 0 {
+            let punc = [",", ";", "."];
+            let asgmt = ["="];
+            let sasgmt = ["+=", "/=", "*=", "-="];
+            let math = ["+", "-", "*", "/", "%"];
+            let comp = ["==", "!=", "<", "<=", ">", ">=", "!"];
+            let log = ["&&", "||"];
+            let par = ["(", ")"];
+            let bool = ["true", "false"];
+            let control = ["if", "while"];
+            let key = ["int", "bool"];
 
-          let punc = [",", ";", "."];
-          let asgmt = ["="];
-          let sasgmt = ["+=", "/=", "*=", "-="];
-          let math = ["+", "-", "*", "/"];
-          let comp = ["==", "!=", "<", "<=", ">", ">=", "!"];
-          let log = ["&&", "||"];
-          let bool = ["true", "false"];
-          
-          if punc.contains(&mat[0]) {
-            return Expr::sp_word(mat[0], "punc");
-          }
-          if asgmt.contains(&mat[0]) {
-            return Expr::sp_word(mat[0], "asgmt");
-          }
-          if sasgmt.contains(&mat[0]) {
-            return Expr::sp_word(mat[0], "sasgmt");
-          }
-          if comp.contains(&mat[0]) {
-            return Expr::sp_word(mat[0], "comp");
-          }
-          if log.contains(&mat[0]) {
-            return Expr::sp_word(mat[0], "log");
-          }
-          if math.contains(&mat[0]) {
-            return Expr::sp_word(mat[0], "math");
-          }
-          if bool.contains(&mat[0]) {
-            return Expr::sp_value(mat[0], "bool");
-          }
-          return Expr::word(mat[0]);
-        } else {
-          println!("Unexpected syntax: |{}|", input);
-          panic!();
-      //  return parse_apply(expr, program.slice(match[0].length));
-
-        }
-      }
-    }
-  }
-
-  pub fn make_words(line: &str) -> Vec<String> {
-    
-    let mut in_string = false;
-    let mut in_space = false;
-    let mut words: Vec<Vec<char>> = Vec::new();
-    let mut cw = 0;
-    let cha: Vec<char> = line.chars().collect::<Vec<char>>();
-    let mut i = 0;
-    while i<cha.len() {
-      let c = cha[i];
-      if in_space && !in_string {
-        if c != ' ' {
-          in_space = false;
-          if c == '"' {
-          if !in_string {
-            cw = cw + 1;
-            words.push(Vec::new());
-            words[cw-1].push(c);
-          } else {
-            words[cw-1].push(c);
-            //prevents start new block at end of line
-            if !(i == cha.len()-1) {
-            cw = cw + 1;
-            words.push(Vec::new());
+            if punc.contains(&mat[0]) {
+                return Type::Punc;
             }
-          }
-          in_string = !in_string;
-          
-        } else {
-          words.push(Vec::new());
-          cw = cw + 1;
-          words[cw-1].push(c);
-          }
-        }
-      } else { 
-        if c == ' ' && !in_string {
-          in_space = true;
-        } else if c == '"' {
-          if !in_string {
-            cw = cw + 1;
-            words.push(Vec::new());
-            words[cw-1].push(c);
-          } else {
-            words[cw-1].push(c);
-            //prevents start new block at end of line
-            if !(i == cha.len()-1) {
-            cw = cw + 1;
-            words.push(Vec::new());
+            if asgmt.contains(&mat[0]) {
+                return Type::Asgmt;
             }
-          }
-          in_string = !in_string;
-          
+            if par.contains(&mat[0]) {
+                return Type::Par;
+            }
+            if sasgmt.contains(&mat[0]) {
+                return Type::Sasgmt;
+            }
+            if comp.contains(&mat[0]) {
+                return Type::Comp;
+            }
+            if log.contains(&mat[0]) {
+                return Type::Log;
+            }
+            if math.contains(&mat[0]) {
+                return Type::Math;
+            }
+            if bool.contains(&mat[0]) {
+                return Type::Bool;
+            }
+            if control.contains(&mat[0]) {
+                return Type::Ctrl;
+            }
+            if key.contains(&mat[0]) {
+                return Type::Key;
+            }
+            return Type::Word;
         } else {
-        if words.len() == 0 {
-          cw = cw + 1;
-          words.push(Vec::new());
+            self.error_handler
+                .throw_error(format!("Unexpected syntax: |{:#?}|", input));
+            panic!();
         }
-        words[cw-1].push(c);
-          
-        }
-      }
-      i = i + 1;
     }
 
-    if words[words.len()-1].len() == 0 {
-      words.remove(words.len()-1);
-    }
-    
-    let mut fin: Vec<String> = Vec::new();
-    for l in words {
-      let temp = l.iter().collect::<String>();
-      fin.push(temp);
-    }
-    return fin.clone();
-  }
+    pub fn make_tokens(&mut self) -> Vec<Expr> {
+        self.current_type = self.get_type(&self.char[0].to_string());
+        self.error_handler.forwards(1);
+        while self.i < self.char.len() {
+            //println!("---------------");
+            //println!("{}", self.i);
+            self.advance();
+            //println!("---------------");
+        }
+        if self.current.len() > 0 {
+            self.push_current();
+        }
 
-  
-  pub fn make_token(self, mut soruce: String) -> Vec<Vec<Expr>> {
-  
-    let comment_free = Tokenizer::remove_comments(soruce);
-    let par_free = Tokenizer::remove_par(comment_free);
-    let lines: Vec<&str> = par_free.split(";").collect();
-    let mut lines_expr: Vec<Vec<Expr>> = Vec::new();
-    let mut l = 0;
-    let mut in_par = false;
-    let mut temp_line: Vec<Expr> = vec![];
-    let mut temp: Vec<Expr> = vec![];
-    while l<lines.len() {
-      let line = lines[l];
-      
-      if line != "" {
-      let mut line_expr: Vec<Expr> = Vec::new();
-      let words: Vec<String> = Tokenizer::make_words(line);
-      if words.len() > 0 {
-        for w in words {
-          
-          if w == "{" || w == "}" {
-            if in_par {
-              for l in temp_line {
-                line_expr.push(l);
-              }
-              line_expr.push(Expr::apply(
-                Expr::word("do"),
-                temp.clone()
-              ));
-              lines_expr.push(line_expr);
-              line_expr = vec!();
-              temp = vec!();
-              temp_line = vec!();
+        return self.lines_expr.clone();
+    }
+
+    fn push_current(&mut self) {
+        //println!("{:#?}", self.current);
+        let input: &str = &self.current.iter().collect::<String>();
+        let expr = self.make_expr(input);
+        self.lines_expr.push(expr);
+        self.current = vec![];
+        self.i_backward();
+        self.current_type = Type::Null;
+    }
+
+    fn advance(&mut self) {
+        if self.char[self.i] == '\"' {
+            if self.is_string {
+                //println!("{:#?}", self.current);
+                let input: &str = &self.current.iter().collect::<String>();
+                let expr = Expr::value(input);
+                self.lines_expr.push(expr);
+                self.current = vec![];
+                self.current_type = Type::Null;
             } else {
-              temp_line = line_expr.clone();
+                if self.current.len() > 0 {
+                    self.i_forward();
+                    self.push_current();
+                }
             }
-            in_par = !in_par;
-          } else if in_par {
-            temp.push(Tokenizer::make_expr(&w));
-          } else {
-            line_expr.push(Tokenizer::make_expr(&w));
-          }
+            self.is_string = !self.is_string;
+        } else if self.char[self.i] == ';' {
+            if self.current.len() > 0 {
+                self.i_forward();
+                self.push_current();
+            }
+            self.lines_expr.push(expr::Expr::sp_value("end", "end"));
+        } else if self.char[self.i] == ',' {
+            if self.current.len() > 0 {
+                self.push_current();
+            }
+        } else if self.char[self.i] == ' ' {
+            if self.current.len() > 0 {
+                self.push_current();
+            } else if self.char[self.i] == '/'
+                && self.i + 1 < self.char.len()
+                && self.char[self.i + 1] == '/'
+            {
+                if self.current.len() > 0 {
+                    self.push_current();
+                }
+                while self.i + 1 < self.char.len() && self.char[self.i] != '\n' {
+                    self.i_forward();
+                }
+            }
+        } else {
+            if self.is_string {
+                self.current.push(self.char[self.i]);
+            } else if self.current_type == Type::Null {
+                self.current.push(self.char[self.i]);
+                self.current_type = self.get_type(&self.char[self.i].to_string());
+            } else {
+                let t: Type = self.get_type(&self.char[self.i].to_string());
+                if t == self.current_type {
+                    self.current.push(self.char[self.i]);
+                } else {
+                    self.push_current();
+                }
+            }
         }
-
-        if !in_par {
-        lines_expr.push(line_expr);
-        }
-      }
-      }
-      l = l + 1;
+        self.i_forward();
     }
 
-    return lines_expr;
-    //println!("{}", soruce);
-  }
-  
+    fn i_forward(&mut self) {
+        if self.char[self.i] == '\n' {
+            self.error_handler.next_line();
+        } else {
+        self.error_handler.forwards(1);
+        }
+      self.i += 1;
+    }
+    fn i_backward(&mut self) {
+        if self.char[self.i-1] == '\n' {
+            self.error_handler.last_line();
+        } else {
+        self.error_handler.backwards(1);
+        }
+      self.i -= 1;
+    }
 }
