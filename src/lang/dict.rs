@@ -181,12 +181,12 @@ impl Dict {
         return Expr::apply(Expr::word(Value::toString("int")), list);
     }
 
-    pub fn fnout(args: Vec<Expr>) -> Expr {
-        return Expr::apply(Expr::word(Value::toString("print")), Vec::from([args[0].clone()]));
+    pub fn fnoutput(args: Vec<Expr>) -> Expr {
+        return Expr::apply(Expr::word(Value::toString("output")), Vec::from([args[0].clone()]));
     }
 
-    pub fn fnoutln(args: Vec<Expr>) -> Expr {
-        return Expr::apply(Expr::word(Value::toString("println")), Vec::from([args[0].clone()]));
+    pub fn fnoutputln(args: Vec<Expr>) -> Expr {
+        return Expr::apply(Expr::word(Value::toString("outputln")), Vec::from([args[0].clone()]));
     }
 
     pub fn fnif(args: Vec<Expr>) -> Expr {
@@ -223,8 +223,8 @@ impl Dict {
         let mut temp: HashMap<_, (fn(Vec<Expr>) -> Expr, usize)> = HashMap::new();
         temp.insert("int".to_string(), (Dict::fnint, 4));
         temp.insert("bool".to_string(), (Dict::fnbool, 4));
-        temp.insert("print".to_string(), (Dict::fnout, 2));
-        temp.insert("println".to_string(), (Dict::fnoutln, 2));
+        temp.insert("output".to_string(), (Dict::fnoutput, 2));
+        temp.insert("outputln".to_string(), (Dict::fnoutputln, 2));
         temp.insert("if".to_string(), (Dict::fnif, 2));
         temp.insert("while".to_string(), (Dict::fnwhile, 2));
         temp.insert("value_bool".to_string(), (Dict::value_bool, 0));

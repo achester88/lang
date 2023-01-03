@@ -27,7 +27,7 @@ impl Specialforms {
 
 //---------------------------------------------------------
 //---------------------------------------------------------
-  pub fn outln(eval: &mut evaluate::Evaluate, args: &Vec<Expr>, scope: &mut HashMap<String, Value>) -> Value {
+  pub fn outputln(eval: &mut evaluate::Evaluate, args: &Vec<Expr>, scope: &mut HashMap<String, Value>) -> Value {
     if args.len() != (1 as usize) {
       println!("Incorrect number of args at out");
       panic!();
@@ -45,7 +45,7 @@ impl Specialforms {
     return Value::Bool(true);
   }
 
-  pub fn out(eval: &mut evaluate::Evaluate, args: &Vec<Expr>, scope: &mut HashMap<String, Value>) -> Value {
+  pub fn output(eval: &mut evaluate::Evaluate, args: &Vec<Expr>, scope: &mut HashMap<String, Value>) -> Value {
     if args.len() != (1 as usize) {
       println!("Incorrect number of args at out");
       panic!();
@@ -249,10 +249,9 @@ impl Specialforms {
   pub fn new() -> Self {
     let mut temp: HashMap<_, fn(&mut evaluate::Evaluate, &Vec<Expr>, &mut HashMap<String, Value>) -> Value> = HashMap::new();
   
-    temp.insert("print".to_string(),   Specialforms::out);
-    temp.insert("println".to_string(),   Specialforms::outln);
+    temp.insert("output".to_string(),   Specialforms::output);
+    temp.insert("outputln".to_string(),   Specialforms::outputln);
     temp.insert("if".to_string(),    Specialforms::fnif);
-    temp.insert("while".to_string(), Specialforms::fnwhile);
     temp.insert("while".to_string(), Specialforms::fnwhile);
     temp.insert("do".to_string(), Specialforms::fndo);
     temp.insert("int".to_string(), Specialforms::fnint);

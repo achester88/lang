@@ -1,9 +1,5 @@
-A W.I.P
+# Lang
 
-<h3>TODO</h3>
-<ul>
-  <li>Added Sapce Suport</li>
-  <li>Fix comments(item above)</li>
-  <li> make brackets to apply function</li>
-  <li>Find way to detect math and logic in lines</li>
-</ul>
+A lang basic complied, single threaded language build entirely on the rust language
+
+Checkout repo on [github](https://github.com/anthonychester/lang)

@@ -29,29 +29,31 @@ fn main() -> Result<()> {
     info!("starting up");
     let args = Cli::from_args();
     let path = args.path;
+    let split: Vec<&str> = path.to_str().unwrap().split('.').collect();
+    if !(split[split.len() - 1] == "lang") {
+        println!(
+            "File {:?} has a unexpected file extension of .{}",
+            path,
+            split[split.len() - 1]
+        );
+        panic!();
+    }
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("could not read file `{}`", "path"))?;
   
-    let mut tok = tokenizer::Tokenizer::new(content);
-    let token_stream = tok.make_tokens();// create preprocesser to check that all ( and { have matches and for () to make bool or int
+    let mut con: Vec<String> = content.clone().split('\n').map(|x| x.to_string()).collect();
+
+    let mut tok = tokenizer::Tokenizer::new(content, con.clone());
+    let (token_stream, pos) = tok.make_tokens();// create preprocesser to check that all ( and { have matches and for () to make bool or int
     //println!("ts {:#?}", token_stream);
+    //output_pos(pos, content);
+    // return 2nd vec of positon in the input for each Expr in token_stream
+    let mut prepro = preprocesser::Preprocesser::new(token_stream, &pos, con);
+    let processed_stream = prepro.process();
 
-    println!("-----{}-----", 0);
-    let mut c = 0;
-    for i in 0..token_stream.clone().len() {
-        let e = token_stream[i].clone();
-        if(e.operator.is_none() || !(e.get_operator().get_value() ==  Value::toString("end"))) {
-            println!("{}: {:?}", i, e);
-            c += 1;
-        }
-    }
-    println!("-----{}-----", c);
-    let one = token_stream[37].clone();
-    println!("none: {:?}", one.get_operator().get_value());
-    println!("end: {}", !(one.get_operator().get_value() == Value::toString("end")));
+    //error_handler.set(1, 0, String::from("Lexer"));
 
-
-    let mut lex = lexer::Lexer::new(token_stream);
+    let mut lex = lexer::Lexer::new(processed_stream);
     let tree = lex.tree();
     //println!("tr {:?}", tree);
     let special_forms = specialforms::Specialforms::new();

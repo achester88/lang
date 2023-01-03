@@ -30,11 +30,12 @@ pub struct Tokenizer {
     pub current: Vec<char>,
     pub current_type: Type,
     pub is_string: bool,
+    pub pos: Vec<(u32, u32)>,
     pub error_handler: ErrorHandler,
 }
 
 impl Tokenizer {
-    pub fn new(soruce: String) -> Self {
+    pub fn new(soruce: String, con: Vec<String>) -> Self {
         let char: Vec<char> = soruce.chars().collect();
         let c = char[0];
         let ct = Type::Null; //self.get_type(&c.to_string());
@@ -45,7 +46,8 @@ impl Tokenizer {
             current: vec![c],
             current_type: ct,
             is_string: false,
-            error_handler: ErrorHandler::new(1,0, String::from("Tokenizer")),
+            pos: vec![],
+            error_handler: ErrorHandler::new(1, 0, String::from("Tokenizer"), con),
         };
     }
 
@@ -134,8 +136,12 @@ impl Tokenizer {
         }
     }
 
-    pub fn make_tokens(&mut self) -> Vec<Expr> {
-        self.current_type = self.get_type(&self.char[0].to_string());
+    pub fn make_tokens(&mut self) -> (Vec<Expr>, Vec<(u32, u32)>) {
+        while self.char[self.i] == ' ' {
+            self.i_forward();
+        }
+        self.pos.push(self.error_handler.get_pos());
+        self.current_type = self.get_type(&self.char[self.i].to_string());
         self.error_handler.forwards(1);
         while self.i < self.char.len() {
             //println!("---------------");
@@ -147,7 +153,7 @@ impl Tokenizer {
             self.push_current();
         }
 
-        return self.lines_expr.clone();
+        return (self.lines_expr.clone(), self.pos.clone());
     }
 
     fn push_current(&mut self) {
@@ -156,6 +162,7 @@ impl Tokenizer {
         let expr = self.make_expr(input);
         self.lines_expr.push(expr);
         self.current = vec![];
+        self.pos.push(self.error_handler.get_pos());
         self.i_backward();
         self.current_type = Type::Null;
     }
@@ -168,6 +175,7 @@ impl Tokenizer {
                 let input: &str = &self.current.iter().collect::<String>();
                 let expr = Expr::value(Value::toString(input));
                 self.lines_expr.push(expr);
+                self.pos.push(self.error_handler.get_pos());
                 self.current = vec![];
                 self.current_type = Type::Null;
             } else {
@@ -183,6 +191,7 @@ impl Tokenizer {
                 self.push_current();
             }
             self.lines_expr.push(expr::Expr::sp_value(Value::End, "end"));
+            self.pos.push(self.error_handler.get_pos());
         } else if self.char[self.i] == ',' {
             if self.current.len() > 0 {
                 self.push_current();
