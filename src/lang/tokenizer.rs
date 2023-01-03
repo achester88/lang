@@ -1,7 +1,7 @@
 use crate::errorhandler;
 use crate::expr;
 use errorhandler::ErrorHandler;
-use expr::Expr;
+use expr::*;
 use regex::Regex;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -52,19 +52,19 @@ impl Tokenizer {
     pub fn make_expr(&mut self, input: &str) -> Expr {
         let tp = self.get_type(input);
         return match tp {
-            Type::String => Expr::value(input),
-            Type::Number => Expr::value(input),
-            Type::Punc => Expr::sp_word(input, "punc"),
-            Type::Asgmt => Expr::sp_word(input, "asgmt"),
-            Type::Par => Expr::sp_value(input, "par"),
-            Type::Sasgmt => Expr::sp_word(input, "sasgmt"),
-            Type::Comp => Expr::sp_word(input, "comp"),
-            Type::Log => Expr::sp_word(input, "log"),
-            Type::Math => Expr::sp_word(input, "math"),
-            Type::Bool => Expr::sp_value(input, "bool"),
-            Type::Ctrl => Expr::sp_word(input, "ctrl"),
-            Type::Key => Expr::sp_value(input, "key"),
-            _ => Expr::word(input),
+            Type::String => Expr::value(Value::toString(input)),
+            Type::Number => Expr::value(Value::toInt(input)),
+            Type::Punc => Expr::sp_word(Value::toString(input), "punc"),
+            Type::Asgmt => Expr::sp_word(Value::toString(input), "asgmt"),
+            Type::Par => Expr::sp_value(Value::toString(input), "par"),
+            Type::Sasgmt => Expr::sp_word(Value::toString(input), "sasgmt"),
+            Type::Comp => Expr::sp_word(Value::toString(input), "comp"),
+            Type::Log => Expr::sp_word(Value::toString(input), "log"),
+            Type::Math => Expr::sp_word(Value::toString(input), "math"),
+            Type::Bool => Expr::sp_value(Value::toBool(input), "bool"),
+            Type::Ctrl => Expr::sp_word(Value::toString(input), "ctrl"),
+            Type::Key => Expr::sp_value(Value::toString(input), "key"),
+            _ => Expr::word(Value::toString(input)),
         };
     }
 
@@ -161,11 +161,12 @@ impl Tokenizer {
     }
 
     fn advance(&mut self) {
-        if self.char[self.i] == '\"' {
+        if self.char[self.i] == '\r' {
+        } else if self.char[self.i] == '\"' {
             if self.is_string {
                 //println!("{:#?}", self.current);
                 let input: &str = &self.current.iter().collect::<String>();
-                let expr = Expr::value(input);
+                let expr = Expr::value(Value::toString(input));
                 self.lines_expr.push(expr);
                 self.current = vec![];
                 self.current_type = Type::Null;
@@ -181,7 +182,7 @@ impl Tokenizer {
                 self.i_forward();
                 self.push_current();
             }
-            self.lines_expr.push(expr::Expr::sp_value("end", "end"));
+            self.lines_expr.push(expr::Expr::sp_value(Value::End, "end"));
         } else if self.char[self.i] == ',' {
             if self.current.len() > 0 {
                 self.push_current();

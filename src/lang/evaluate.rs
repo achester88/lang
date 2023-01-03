@@ -1,44 +1,35 @@
 
 use std::collections::HashMap;
-
-//#[path = "specialforms.rs"]
-//pub mod specialforms;
-
-//#[path = "parser.rs"]
-//pub mod parser;
-
-//#[path = "expr.rs"]
-//pub mod expr;
+//use std::ops::Deref;
 
 use crate::specialforms;
 
-//use specialforms::expr::Expr;
-use crate::expr::Expr;
+use crate::expr::*;
 
 
-pub struct Evaluate<'a> {
-  pub special_forms: specialforms::Specialforms<'a>
+pub struct Evaluate {
+  pub special_forms: specialforms::Specialforms
 }
 
-impl Evaluate<'_> {
-  pub fn evaluate(&mut self, expr: Expr,  mut scope: &mut HashMap<String, String>) -> String {
+impl Evaluate {
+  pub fn evaluate(&mut self, expr: Expr,  mut scope: &mut HashMap<String, Value>) -> Value { //-> String
   
-    if expr.get_type() == String::from("value") {
-      return expr.value.unwrap();
-    } else if expr.type_of == String::from("word") {
-      let val = expr.value.unwrap();
+    if expr.get_type() == Type::Value {
+      return expr.value;
+    } else if expr.type_of == Type::Word {
+      let val = expr.value.to_string();
       //println!("{:#?}", val);
       if scope.contains_key(&val) {
-        return String::from(scope.get(&val).unwrap());
+        return scope.get(&val).unwrap().to_owned();
         //return scope[expr.name];
       } else {
-        println!("Undefined binding: ${}", val);
+        println!("Undefined binding: ${:?}", val);
         panic!();
       }
-    } else if expr.get_type() == String::from("apply") {
+    } else if expr.get_type() == Type::Apply {
       let operator = expr.get_operator();
       let args = expr.get_args();
-      let opval = operator.value.unwrap();
+      let opval = operator.value.to_string();
       if self.special_forms.map.contains_key(&*opval) {
         //println!("type: {:#?}", opval.clone());
         return self.special_forms.get(&opval)(self, &args, &mut scope);
@@ -57,7 +48,7 @@ impl Evaluate<'_> {
     }
       
     }
-    println!("Error at evaluate type: {}", expr.get_type());
+    println!("Error at evaluate type: {:?}", expr.get_type());
     panic!();
   }
 
