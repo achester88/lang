@@ -67,3 +67,9 @@ fn main() -> Result<()> {
     eval.evaluate(tree, &mut scope); // for each value check if needed +-/* or bool
     Ok(())
 }
+
+//x86_64-pc-windows-gnu
+//x86_64-apple-darwin	
+//aarch64-unknown-linux-gnu
+
+//cargo build --release --target {}
