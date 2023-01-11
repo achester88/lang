@@ -1,7 +1,2 @@
-int x = 0;
-while(x < 10) {
-  if(x < 7) {
-    outputln(x);
-  };
-  int x = x + 1;
-}
+string g = "h" + "i";
+outputln(g);

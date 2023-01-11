@@ -96,7 +96,7 @@ impl Tokenizer {
             let par = ["(", ")"];
             let bool = ["true", "false"];
             let control = ["if", "while"];
-            let key = ["int", "bool"];
+            let key = ["int", "bool", "string"];
 
             if punc.contains(&mat[0]) {
                 return Type::Punc;
@@ -190,7 +190,8 @@ impl Tokenizer {
                 self.i_forward();
                 self.push_current();
             }
-            self.lines_expr.push(expr::Expr::sp_value(Value::End, "end"));
+            self.lines_expr
+                .push(expr::Expr::sp_value(Value::End, "end"));
             self.pos.push(self.error_handler.get_pos());
         } else if self.char[self.i] == ',' {
             if self.current.len() > 0 {
@@ -232,16 +233,16 @@ impl Tokenizer {
         if self.char[self.i] == '\n' {
             self.error_handler.next_line();
         } else {
-        self.error_handler.forwards(1);
+            self.error_handler.forwards(1);
         }
-      self.i += 1;
+        self.i += 1;
     }
     fn i_backward(&mut self) {
-        if self.char[self.i-1] == '\n' {
+        if self.char[self.i - 1] == '\n' {
             self.error_handler.last_line();
         } else {
-        self.error_handler.backwards(1);
+            self.error_handler.backwards(1);
         }
-      self.i -= 1;
+        self.i -= 1;
     }
 }

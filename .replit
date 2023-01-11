@@ -1,4 +1,4 @@
-run = ["cargo", "run", "line.phx"]
+run = ["cargo", "run", "line.lang"]
 
 entrypoint = "src/main.rs"
 

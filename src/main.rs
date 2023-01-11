@@ -10,8 +10,8 @@ use structopt::StructOpt;
 use std::panic;
 
 mod lang;
-use lang::*;
 use expr::*;
+use lang::*;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -40,14 +40,15 @@ fn main() -> Result<()> {
     }
     let content = std::fs::read_to_string(path)
         .with_context(|| format!("could not read file `{}`", "path"))?;
-  
+
     let mut con: Vec<String> = content.clone().split('\n').map(|x| x.to_string()).collect();
 
     let mut tok = tokenizer::Tokenizer::new(content, con.clone());
-    let (token_stream, pos) = tok.make_tokens();// create preprocesser to check that all ( and { have matches and for () to make bool or int
-    //println!("ts {:#?}", token_stream);
-    //output_pos(pos, content);
-    // return 2nd vec of positon in the input for each Expr in token_stream
+    let (token_stream, pos) = tok.make_tokens(); // create preprocesser to check that all ( and { have matches and for () to make bool or int
+    println!("stream: {:#?}", token_stream);
+                                                 //println!("ts {:#?}", token_stream);
+                                                 //output_pos(pos, content);
+                                                 // return 2nd vec of positon in the input for each Expr in token_stream
     let mut prepro = preprocesser::Preprocesser::new(token_stream, &pos, con);
     let processed_stream = prepro.process();
 
@@ -55,7 +56,7 @@ fn main() -> Result<()> {
 
     let mut lex = lexer::Lexer::new(processed_stream);
     let tree = lex.tree();
-    //println!("tr {:?}", tree);
+    println!("tr {:?}", tree);
     let special_forms = specialforms::Specialforms::new();
 
     let mut eval = evaluate::Evaluate {
@@ -69,7 +70,7 @@ fn main() -> Result<()> {
 }
 
 //x86_64-pc-windows-gnu
-//x86_64-apple-darwin	
+//x86_64-apple-darwin
 //aarch64-unknown-linux-gnu
 
 //cargo build --release --target {}
