@@ -127,6 +127,15 @@ impl Specialforms {
             panic!();
         }
         let value = eval.evaluate(args[1].clone(), scope);
+
+        match &value {
+            Value::Int(_x) => (),
+            _ => {
+                println!("Incorrect type of value at int");
+                panic!();
+            }
+        }
+
         let name = args[0].get_value();
         scope.insert(name.to_string(), value.clone());
         return value;
@@ -142,6 +151,15 @@ impl Specialforms {
             panic!();
         }
         let value = eval.evaluate(args[1].clone(), scope);
+
+        match &value {
+            Value::Bool(_x) => (),
+            _ => {
+                println!("Incorrect type of value at bool");
+                panic!();
+            }
+        }
+
         let name = args[0].get_value();
         scope.insert(name.to_string(), value.clone());
         return value;
@@ -188,7 +206,6 @@ impl Specialforms {
                 return Value::String(s1 + &s2);
             }
             (Value::Int(i1), Value::Int(i2)) => {
-                let (i1, i2) = Specialforms::check(eval, args, scope);
                 return Value::Int(i1 + i2);
             }
             _ => {
@@ -211,8 +228,22 @@ impl Specialforms {
         args: &Vec<Expr>,
         scope: &mut HashMap<String, Value>,
     ) -> Value {
-        let (i1, i2) = Specialforms::check(eval, args, scope);
-        return Value::Int(i1 * i2);
+
+      let arg1 = eval.evaluate(args[0].clone(), scope);
+      let arg2 = eval.evaluate(args[1].clone(), scope);
+
+      match (arg1, arg2) {
+            (Value::String(s1), Value::Int(s2)) => {
+                return Value::String(s1.repeat(s2 as usize));
+            }
+            (Value::Int(i1), Value::Int(i2)) => {
+                return Value::Int(i1 * i2);
+            }
+            _ => {
+                println!("Unexpected types at +");
+                panic!();
+            }
+        }
     }
     pub fn fndiv(
         eval: &mut evaluate::Evaluate,

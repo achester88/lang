@@ -187,7 +187,7 @@ impl Dict {
                                 op.push(part[i].get_value());
                                 index.push(i);
                             }
-                        } else if !mdr_op {
+                        } else if !mdr_op && [Value::toString("+")].contains(&expr.get_value()) {
                             op.push(part[i].get_value());
                             index.push(i);
                         }
@@ -243,7 +243,7 @@ impl Dict {
     }
 
     pub fn fnstring(args: Vec<Expr>) -> Expr {
-        println!("s: {:?}", args);
+        //println!("s: {:?}", args);
         let mut list: Vec<Expr> = Vec::from([]);
         list.push(args[1].clone());
         if args[2].get_value() == Value::toString("=") {
@@ -293,7 +293,7 @@ impl Dict {
     }
 
     pub fn get(&self, s: String) -> (fn(Vec<Expr>) -> Expr, usize) {
-        println!("S: {}", s);
+        //println!("S: {}", s);
         match self.map.get(&s) {
             Some(f) => return *f,
             None => {

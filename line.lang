@@ -1,2 +1,2 @@
-string g = "h" + "i";
-outputln(g);
+string g = "8" + "0";
+outputln(g * 5);

@@ -74,3 +74,5 @@ fn main() -> Result<()> {
 //aarch64-unknown-linux-gnu
 
 //cargo build --release --target {}
+
+//top, lk {pid}
