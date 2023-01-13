@@ -2,7 +2,7 @@ use crate::errorhandler;
 use crate::expr;
 use errorhandler::ErrorHandler;
 use expr::*;
-use regex::Regex;
+//use regex::Regex;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Type {
@@ -52,88 +52,83 @@ impl Tokenizer {
     }
 
     pub fn make_expr(&mut self, input: &str) -> Expr {
-        let tp = self.get_type(input);
+        let tp = self.get_type(&input);
         return match tp {
-            Type::String => Expr::value(Value::toString(input)),
-            Type::Number => Expr::value(Value::toInt(input)),
-            Type::Punc => Expr::sp_word(Value::toString(input), "punc"),
-            Type::Asgmt => Expr::sp_word(Value::toString(input), "asgmt"),
-            Type::Par => Expr::sp_value(Value::toString(input), "par"),
-            Type::Sasgmt => Expr::sp_word(Value::toString(input), "sasgmt"),
-            Type::Comp => Expr::sp_word(Value::toString(input), "comp"),
-            Type::Log => Expr::sp_word(Value::toString(input), "log"),
-            Type::Math => Expr::sp_word(Value::toString(input), "math"),
-            Type::Bool => Expr::sp_value(Value::toBool(input), "bool"),
-            Type::Ctrl => Expr::sp_word(Value::toString(input), "ctrl"),
-            Type::Key => Expr::sp_value(Value::toString(input), "key"),
-            _ => Expr::word(Value::toString(input)),
+            Type::String => Expr::value(Value::toString(&input)),
+            Type::Number => Expr::value(Value::toInt(&input)),
+            Type::Punc => Expr::sp_word(Value::toString(&input), "punc"),
+            Type::Asgmt => Expr::sp_word(Value::toString(&input), "asgmt"),
+            Type::Par => Expr::sp_value(Value::toString(&input), "par"),
+            Type::Sasgmt => Expr::sp_word(Value::toString(&input), "sasgmt"),
+            Type::Comp => Expr::sp_word(Value::toString(&input), "comp"),
+            Type::Log => Expr::sp_word(Value::toString(&input), "log"),
+            Type::Math => Expr::sp_word(Value::toString(&input), "math"),
+            Type::Bool => Expr::sp_value(Value::toBool(&input), "bool"),
+            Type::Ctrl => Expr::sp_word(Value::toString(&input), "ctrl"),
+            Type::Key => Expr::sp_value(Value::toString(&input), "key"),
+            _ => Expr::word(Value::toString(&input)),
         };
     }
 
     pub fn get_type(&mut self, input: &str) -> Type {
-        let mut mat: Vec<&str>;
-        let is_number = Regex::new(r#"^\d+\b"#).unwrap();
-        let is_word = Regex::new(r#"^[^\s,#"]+"#).unwrap();
+
+        let punc = [",", ";", "."];
+        let asgmt = ["="];
+        let sasgmt = ["+=", "/=", "*=", "-="];
+        let math = ["+", "-", "*", "/", "%"];
+        let comp = ["==", "!=", "<", "<=", ">", ">=", "!"];
+        let log = ["&&", "||"];
+        let par = ["(", ")"];
+        let bool = ["true", "false"];
+        let control = ["if", "while"];
+        let key = ["int", "bool", "string"];
 
         if input == "\n" {
             return Type::NEWL;
         }
 
-        //Match Numbers ex: 10
-        mat = is_number.find_iter(input).map(|x| x.as_str()).collect();
-        if mat.len() > 0 {
-            return Type::Number;
+        let mut is_num = true;
+        for c in input.chars() {
+            if !c.is_numeric() {
+                is_num = false;
+            }
         }
-        //Match words ex: print
-        mat = is_word.find_iter(input).map(|x| x.as_str()).collect();
-        if mat.len() > 0 {
-            let punc = [",", ";", "."];
-            let asgmt = ["="];
-            let sasgmt = ["+=", "/=", "*=", "-="];
-            let math = ["+", "-", "*", "/", "%"];
-            let comp = ["==", "!=", "<", "<=", ">", ">=", "!"];
-            let log = ["&&", "||"];
-            let par = ["(", ")"];
-            let bool = ["true", "false"];
-            let control = ["if", "while"];
-            let key = ["int", "bool", "string"];
 
-            if punc.contains(&mat[0]) {
+        if is_num {
+            return Type::Number;
+        } 
+        
+            if punc.contains(&input) {
                 return Type::Punc;
             }
-            if asgmt.contains(&mat[0]) {
+            if asgmt.contains(&input) {
                 return Type::Asgmt;
             }
-            if par.contains(&mat[0]) {
+            if par.contains(&input) {
                 return Type::Par;
             }
-            if sasgmt.contains(&mat[0]) {
+            if sasgmt.contains(&input) {
                 return Type::Sasgmt;
             }
-            if comp.contains(&mat[0]) {
+            if comp.contains(&input) {
                 return Type::Comp;
             }
-            if log.contains(&mat[0]) {
+            if log.contains(&input) {
                 return Type::Log;
             }
-            if math.contains(&mat[0]) {
+            if math.contains(&input) {
                 return Type::Math;
             }
-            if bool.contains(&mat[0]) {
+            if bool.contains(&input) {
                 return Type::Bool;
             }
-            if control.contains(&mat[0]) {
+            if control.contains(&input) {
                 return Type::Ctrl;
             }
-            if key.contains(&mat[0]) {
+            if key.contains(&input) {
                 return Type::Key;
             }
             return Type::Word;
-        } else {
-            self.error_handler
-                .throw_error(format!("Unexpected syntax: |{:#?}|", input));
-            panic!();
-        }
     }
 
     pub fn make_tokens(&mut self) -> (Vec<Expr>, Vec<(u32, u32)>) {
@@ -159,7 +154,7 @@ impl Tokenizer {
     fn push_current(&mut self) {
         //println!("{:#?}", self.current);
         let input: &str = &self.current.iter().collect::<String>();
-        let expr = self.make_expr(input);
+        let expr = self.make_expr(&input);
         self.lines_expr.push(expr);
         self.current = vec![];
         self.pos.push(self.error_handler.get_pos());
@@ -173,7 +168,7 @@ impl Tokenizer {
             if self.is_string {
                 //println!("{:#?}", self.current);
                 let input: &str = &self.current.iter().collect::<String>();
-                let expr = Expr::value(Value::toString(input));
+                let expr = Expr::value(Value::toString(&input));
                 self.lines_expr.push(expr);
                 self.pos.push(self.error_handler.get_pos());
                 self.current = vec![];

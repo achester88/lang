@@ -108,7 +108,6 @@ dependencies = [
  "anyhow",
  "env_logger",
  "log",
- "regex",
  "structopt",
 ]
 
