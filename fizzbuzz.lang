@@ -1,16 +1,17 @@
 int i = 1;
 while(i < 101) {
+  string mes = "";
   int five = i % 5;
   int three = i % 3;
   if (!five == 0 && !three == 0) {
-    output(i)
+    mes = mes += i;
   }
   if (three == 0) {
-    output("Fizz")
+    mes = mes += "Fizz";
   }
   if (five == 0) {
-    output("Buzz")
+    mes = mes +="Buzz"
   }
-  outputln("")
+  outputln(mes)
   int i = i + 1;
 }

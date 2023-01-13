@@ -3,33 +3,62 @@
 #[allow(unused_imports)]
 use std::collections::HashMap;
 
-use anyhow::{Context, Result};
-use log::info;
-use structopt::StructOpt;
-
+use std::env;
 use std::panic;
 
 mod lang;
 use expr::*;
 use lang::*;
 
+/*
 #[derive(StructOpt)]
 struct Cli {
     #[structopt(parse(from_os_str))]
     path: std::path::PathBuf,
 }
+*/
 
-fn main() -> Result<()> {
+fn main() -> Result<(), ()> {
     // /*
     panic::set_hook(Box::new(|_info| {
         // do nothing
     }));
     // */
-    env_logger::init();
-    info!("starting up");
-    let args = Cli::from_args();
-    let path = args.path;
-    let split: Vec<&str> = path.to_str().unwrap().split('.').collect();
+    //env_logger::init();
+    /*
+        error: The following required arguments were not provided:
+        <path>
+
+    USAGE:
+        lang <path>
+
+    For more information try --help
+        */
+    //info!("starting up");
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        println!(
+            "error: The following required arguments were not provided:
+        <path>
+
+    USAGE:
+        lang <path>
+
+    For more information try --help"
+        );
+        panic!();
+    }
+
+    if &args[1] == "--help" {
+        println!(
+            "USAGE:
+        lang <path>"
+        );
+        return Ok(());
+    }
+
+    let path = &args[1];
+    let split: Vec<&str> = path.as_str().split('.').collect();
     if !(split[split.len() - 1] == "lang") {
         println!(
             "File {:?} has a unexpected file extension of .{}",
@@ -38,14 +67,21 @@ fn main() -> Result<()> {
         );
         panic!();
     }
-    let content = std::fs::read_to_string(path)
-        .with_context(|| format!("could not read file `{}`", "path"))?;
+    let mut content: String;
+
+    match std::fs::read_to_string(path) {
+        Ok(x) => content = x,
+        Err(E) => {
+            println!("could not read file `{}`", path);
+            panic!();
+        }
+    }
 
     let mut con: Vec<String> = content.clone().split('\n').map(|x| x.to_string()).collect();
 
     let mut tok = tokenizer::Tokenizer::new(content, con.clone());
     let (token_stream, pos) = tok.make_tokens(); // create preprocesser to check that all ( and { have matches and for () to make bool or int
-    println!("stream: {:#?}", token_stream);
+                                                 //println!("stream: {:#?}", token_stream);
                                                  //println!("ts {:#?}", token_stream);
                                                  //output_pos(pos, content);
                                                  // return 2nd vec of positon in the input for each Expr in token_stream
@@ -56,7 +92,7 @@ fn main() -> Result<()> {
 
     let mut lex = lexer::Lexer::new(processed_stream);
     let tree = lex.tree();
-    println!("tr {:?}", tree);
+    //println!("tr {:?}", tree);
     let special_forms = specialforms::Specialforms::new();
 
     let mut eval = evaluate::Evaluate {
