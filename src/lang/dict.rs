@@ -1,4 +1,5 @@
 use crate::expr;
+use crate::lexer;
 use expr::*;
 use std::collections::HashMap;
 
@@ -269,25 +270,40 @@ impl Dict {
         );
     }
 
-    pub fn fnif(args: Vec<Expr>) -> Expr {
-        let bool = Dict::value_bool(args[0..args.len() - 1].to_vec());
+    pub fn fnsleep(args: Vec<Expr>) -> Expr {
         return Expr::apply(
-            Expr::word(Value::toString("if")),
-            vec![bool, args[args.len() - 1].clone()],
+            Expr::word(Value::toString("sleep")),
+            Vec::from([args[0].clone()]),
         );
     }
+
+    pub fn fnif(args: Vec<Expr>) -> Expr {      
+        //println!("{:?}\n---------------------", args);
+        let mut exprs = args.clone();
+        let stat = exprs.remove(0);
+        let cond = exprs.remove(0);
+        if exprs.len() != 0 {
+          return Expr::apply(
+              Expr::word(Value::toString("if")),
+              vec![cond, stat, Dict::fnif(exprs)],
+          );
+        }
+          return Expr::apply(
+              Expr::word(Value::toString("if")),
+              vec![cond, stat],
+          );
+    }
     pub fn fnwhile(args: Vec<Expr>) -> Expr {
-        //println!("{:#?}", args[0..args.len()-1].to_vec());
-        let bool = Dict::value_bool(args[0..args.len() - 1].to_vec());
-        return Expr::apply(
+        Expr::apply(
             Expr::word(Value::toString("while")),
-            vec![bool, args[args.len() - 1].clone()],
-        );
+            vec![args[1].clone(), args[0].clone()],
+        )
     }
 
     //-----------------------------------------------------------------------
 
     pub fn getfn(&self, s: String) -> fn(Vec<Expr>) -> Expr {
+        //println!("{}", s);
         let (fun, _size) = self.get(s);
         return fun;
     }
@@ -310,6 +326,7 @@ impl Dict {
         temp.insert("string".to_string(), (Dict::fnstring, 4));
         temp.insert("output".to_string(), (Dict::fnoutput, 2));
         temp.insert("outputln".to_string(), (Dict::fnoutputln, 2));
+        temp.insert("sleep".to_string(), (Dict::fnsleep, 2));
         temp.insert("if".to_string(), (Dict::fnif, 2));
         temp.insert("while".to_string(), (Dict::fnwhile, 2));
         temp.insert("value_bool".to_string(), (Dict::value_bool, 0));

@@ -1,2 +1,9 @@
-string g = "8" + "0";
-outputln(g * 5);
+if(false) {
+  outputln("if");
+} else if(1 == 0) {
+  outputln("me");
+} else if(1 == 2) {
+  outputln("bad");
+} else {
+  outputln("pass");
+}
