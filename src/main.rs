@@ -87,7 +87,7 @@ fn main() -> Result<(), ()> {
 
     let mut lex = lexer::Lexer::new(processed_stream);
     let tree = lex.tree();
-    //println!("tr {:?}", tree);
+    println!("tr {:?}", tree);
     let special_forms = specialforms::Specialforms::new();
 
     let mut eval = evaluate::Evaluate {

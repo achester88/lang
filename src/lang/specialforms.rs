@@ -230,6 +230,9 @@ impl Specialforms {
             (Value::Int(i1), Value::Int(i2)) => {
                 return Value::Int(i1 + i2);
             }
+            (Value::String(s1), Value::Int(i2)) => {
+                return Value::String(s1 + &i2.to_string());
+            }
             _ => {
                 println!("Unexpected types at +");
                 panic!();
@@ -437,6 +440,24 @@ impl Specialforms {
         temp.insert("&&".to_string(), Specialforms::fnand);
         temp.insert("||".to_string(), Specialforms::fnor);
         temp.insert("!".to_string(), Specialforms::fnnot);
+
+        temp.insert("hi".to_string(), | eval: &mut evaluate::Evaluate,
+        args: &Vec<Expr>,
+        scope: &mut HashMap<String, Value> |
+     -> Value {
+       eval.evaluate(
+        Expr::apply(
+          Expr::word(Value::Do),
+          vec![
+            Expr::apply(
+            Expr::word(Value::toString("outputln")),
+            Vec::from([args[0].clone()]),
+        )
+          ]
+        ), scope);
+
+        return Value::Bool(true)
+     });
 
         return Self { map: temp };
     }

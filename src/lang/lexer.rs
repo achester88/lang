@@ -48,7 +48,6 @@ impl Lexer {
             //if !self.ce.value.clone().is_none() {
             //println!("----------{:#?}----{}-----", self.ce, self.i);
             //}
-
             self.ce = self.source[self.i].clone();
             self.count();
             self.next();
@@ -102,7 +101,7 @@ impl Lexer {
             self.i -= 1;
             self.temp.pop();
             self.list
-                .push(self.dict.getfn(self.temp[0].get_value().to_string())(
+                .push(self.dict.getfns(self.temp[0].get_value().to_string())(
                     self.temp.clone(),
                 ));
           self.temp = vec![];
@@ -132,7 +131,7 @@ impl Lexer {
             if self.is_control {
                 if self.match_c == ')' {
                     self.match_c = '{';
-                    self.cond = self.dict.getfn("value_bool".to_string())(self.current.clone());
+                    self.cond = Expr::apply(Expr::word(Value::toString("eval_bool")), self.current.clone());
                     self.current = vec![];
                 } else if self.match_c == '}' {
                     if self.bc == 0 {
@@ -165,7 +164,7 @@ impl Lexer {
                             self.ce = self.source[self.i].clone();
                         }
                         } else {
-                          self.list.push(self.dict.getfn(self.key.clone())(self.temp.clone()));
+                          self.list.push(self.dict.getfns(self.key.clone())(self.temp.clone()));
                             self.current = vec![];
                             self.is_control = false;
                             self.match_c = '(';
@@ -178,10 +177,24 @@ impl Lexer {
                 }
             } else {
                 //println!("-----####--{:#?}", self.current.clone());
+              //println!("{:?}", self.key.clone());
+
+              let mut expr: Expr;
+
+              expr = match self.dict.getfn(self.key.clone()) {
+                Ok(f) => f(self.current.clone()),
+                Err(()) => { println!("error");
+                  Expr::apply(
+                    Expr::word(Value::String(self.key.clone())),
+                    self.current.clone(),
+                  )}
+              };
+              
                 self.list
-                    .push(self.dict.getfn(self.key.clone())(self.current.clone()));
+                    .push(expr);
                 self.current = vec![];
                 self.match_c = '(';
+              
             }
         } else {
             self.current.push(self.ce.clone());
