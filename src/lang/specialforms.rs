@@ -223,18 +223,21 @@ impl Specialforms {
         let arg1 = eval.evaluate(args[0].clone(), scope);
         let arg2 = eval.evaluate(args[1].clone(), scope);
 
-        match (arg1, arg2) {
+        match (&arg1, &arg2) {
             (Value::String(s1), Value::String(s2)) => {
-                return Value::String(s1 + &s2);
-            }
+                return Value::String(s1.to_string() + &s2);
+            },
+            (Value::Int(i1), Value::String(s2)) => {
+                return Value::String(i1.to_string() + &s2);
+            },
+            (Value::String(s1), Value::Int(i2)) => {
+                return Value::String(s1.to_string() + &i2.to_string());
+            },
             (Value::Int(i1), Value::Int(i2)) => {
                 return Value::Int(i1 + i2);
-            }
-            (Value::String(s1), Value::Int(i2)) => {
-                return Value::String(s1 + &i2.to_string());
-            }
+            },
             _ => {
-                println!("Unexpected types at +");
+                println!("Unexpected types at +, can't add {} and {}", arg1.get_type(), arg2.get_type());
                 panic!();
             }
         }
