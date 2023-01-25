@@ -49,9 +49,17 @@ Suported operations:
 
 **if**: Executes a statment if a codition is true 
 
+**else**: Executes a statment if a if statment is false 
+
+**else if**: Executes a statment if a if statment is false and if a new condition is true
+
 Example:
 
     if(condition) {
+        statement
+    } else if (condition) {
+        statement
+    } else {
         statement
     }
 **while**: Contiunes to execute a statment until a codition is false
@@ -62,3 +70,7 @@ Example:
         statement
     }
 ```
+
+## Built-In Methods
+---
+`sleep(ms: number)` Sleep for defined milliseconds

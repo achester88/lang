@@ -1,4 +1,5 @@
 use crate::expr;
+use crate::lexer;
 use expr::*;
 use std::collections::HashMap;
 
@@ -8,8 +9,8 @@ pub struct Dict {
 
 impl Dict {
     pub fn value_int(part: Vec<Expr>) -> Expr {
+      //println!("part: {:#?}", part);
         if part.len() == 1 {
-            //println!("part: {:#?}", part);
             return part[0].clone();
         } else {
             //return part[part.len()/2].clone();
@@ -160,6 +161,7 @@ impl Dict {
             }
             return Dict::value_bool(new_part);
         }
+      
     }
 
     pub fn value_string(part: Vec<Expr>) -> Expr {
@@ -269,40 +271,79 @@ impl Dict {
         );
     }
 
-    pub fn fnif(args: Vec<Expr>) -> Expr {
-        let bool = Dict::value_bool(args[0..args.len() - 1].to_vec());
+    pub fn fnsleep(args: Vec<Expr>) -> Expr {
         return Expr::apply(
-            Expr::word(Value::toString("if")),
-            vec![bool, args[args.len() - 1].clone()],
+            Expr::word(Value::toString("sleep")),
+            Vec::from([args[0].clone()]),
         );
+    }
+
+    pub fn fnif(args: Vec<Expr>) -> Expr {
+        //println!("{:?}\n---------------------", args);
+        let mut exprs = args.clone();
+        let stat = exprs.remove(0);
+        let cond = Dict::value_bool(exprs.remove(0).get_args());
+        if exprs.len() != 0 {
+            return Expr::apply(
+                Expr::word(Value::toString("if")),
+                vec![cond, stat, Dict::fnif(exprs)],
+            );
+        }
+        return Expr::apply(Expr::word(Value::toString("if")), vec![cond, stat]);
     }
     pub fn fnwhile(args: Vec<Expr>) -> Expr {
-        //println!("{:#?}", args[0..args.len()-1].to_vec());
-        let bool = Dict::value_bool(args[0..args.len() - 1].to_vec());
-        return Expr::apply(
+        Expr::apply(
             Expr::word(Value::toString("while")),
-            vec![bool, args[args.len() - 1].clone()],
-        );
+            vec![ Dict::value_bool(args[1].clone().get_args()), args[0].clone()],
+        )
     }
 
+    pub fn fnfn(args: Vec<Expr>) -> Expr {
+      println!("{:?}", args);
+      return Expr::empty();
+    }
+    
     //-----------------------------------------------------------------------
 
-    pub fn getfn(&self, s: String) -> fn(Vec<Expr>) -> Expr {
-        let (fun, _size) = self.get(s);
+    pub fn getfn(&self, s: String) -> Result< fn(Vec<Expr>) -> Expr, () > {
+        //println!("{}", s);
+        let (fun, _size) = match self.map.get(&s) {
+            Some(f) => *f,
+            None => return Err(())//(*self.map.get("defualt").unwrap())
+                //println!("undefied fn {:?}", s);
+                //panic!()
+            
+        };
+        return Ok(fun);
+    }
+
+      pub fn getfns(&self, s: String) -> fn(Vec<Expr>) -> Expr {
+        //println!("{}", s);
+        let (fun, _size) = match self.map.get(&s) {
+            Some(f) => *f,
+            None => {
+                println!("undefied fn {:?}", s);
+                panic!()
+            }
+            
+        };
         return fun;
     }
 
+  /*
     pub fn get(&self, s: String) -> (fn(Vec<Expr>) -> Expr, usize) {
         //println!("S: {}", s);
         match self.map.get(&s) {
             Some(f) => return *f,
             None => {
-                println!("undefied fn {:?}", s);
-                panic!()
+                return *self.map.get("defualt").unwrap();
+                //println!("undefied fn {:?}", s);
+                //panic!()
             }
         };
     }
-
+*/
+  
     pub fn new() -> Self {
         let mut temp: HashMap<_, (fn(Vec<Expr>) -> Expr, usize)> = HashMap::new();
         temp.insert("int".to_string(), (Dict::fnint, 4));
@@ -310,9 +351,12 @@ impl Dict {
         temp.insert("string".to_string(), (Dict::fnstring, 4));
         temp.insert("output".to_string(), (Dict::fnoutput, 2));
         temp.insert("outputln".to_string(), (Dict::fnoutputln, 2));
+        temp.insert("sleep".to_string(), (Dict::fnsleep, 2));
         temp.insert("if".to_string(), (Dict::fnif, 2));
         temp.insert("while".to_string(), (Dict::fnwhile, 2));
+        temp.insert("fn".to_string(), (Dict::fnfn, 0));
         temp.insert("value_bool".to_string(), (Dict::value_bool, 0));
-        return Self { map: temp };
+
+      return Self { map: temp };
     }
 }

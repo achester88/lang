@@ -80,7 +80,7 @@ impl Tokenizer {
         let log = ["&&", "||"];
         let par = ["(", ")"];
         let bool = ["true", "false"];
-        let control = ["if", "while"];
+        let control = ["if", "while", "else", "fn"];
         let key = ["int", "bool", "string"];
 
         if input == "\n" {

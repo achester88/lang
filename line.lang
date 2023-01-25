@@ -1,2 +1,3 @@
-string g = "8" + "0";
-outputln(g * 5);
+fn hello () {
+  output("hi");
+}

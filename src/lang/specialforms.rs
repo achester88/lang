@@ -2,7 +2,7 @@ use std::io;
 use std::io::Write; // <--- bring flush() into scope
 
 use std::collections::HashMap;
-
+use std::{thread, time};
 //use crate::parser;
 use crate::evaluate;
 use crate::expr;
@@ -71,21 +71,43 @@ impl Specialforms {
         io::stdout().flush().unwrap();
         return Value::Bool(true);
     }
+      pub fn sleep(
+        eval: &mut evaluate::Evaluate,
+        args: &Vec<Expr>,
+        scope: &mut HashMap<String, Value>,
+    ) -> Value {
+        if args.len() != (1 as usize) {
+            println!("Incorrect number of args at sleep");
+            panic!();
+        }
+        match eval.evaluate(args[0].clone(), scope) {
+          Value::Int(i) => {
+    thread::sleep(time::Duration::from_millis(i as u64));
+          }
+           _ => {
+                println!("Unexpected types at +");
+                panic!();
+            }
+        }
+        return Value::Bool(true);
+    }
 
     pub fn fnif(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
         scope: &mut HashMap<String, Value>,
     ) -> Value {
-        if args.len() != (2 as usize) {
-            println!("Incorrect number of args at if");
-            panic!();
-        } else if eval.evaluate(args[0].clone(), scope) == Value::Bool(true) {
+          //println!("{:?}", args);
+        //if args.len() != (2 as usize) {
+          //  println!("Incorrect number of args at if");
+         //   panic!();
+        if eval.evaluate(args[0].clone(), scope) == Value::Bool(true) {
             return eval.evaluate(args[1].clone(), scope);
-        } /* else {
+        } else if args.len() == 3 {
+            //println!("~ {:?} ~\n", args[2].clone());
             return  eval.evaluate(args[2].clone(), scope);
-          } */
-        return Value::Bool(true);
+          }
+        return Value::Bool(false);
     }
 
     pub fn fnwhile(
@@ -402,6 +424,7 @@ impl Specialforms {
 
         temp.insert("output".to_string(), Specialforms::output);
         temp.insert("outputln".to_string(), Specialforms::outputln);
+        temp.insert("sleep".to_string(), Specialforms::sleep);
         temp.insert("if".to_string(), Specialforms::fnif);
         temp.insert("while".to_string(), Specialforms::fnwhile);
         temp.insert("do".to_string(), Specialforms::fndo);
@@ -420,6 +443,24 @@ impl Specialforms {
         temp.insert("&&".to_string(), Specialforms::fnand);
         temp.insert("||".to_string(), Specialforms::fnor);
         temp.insert("!".to_string(), Specialforms::fnnot);
+
+        temp.insert("hi".to_string(), | eval: &mut evaluate::Evaluate,
+        args: &Vec<Expr>,
+        scope: &mut HashMap<String, Value> |
+     -> Value {
+       eval.evaluate(
+        Expr::apply(
+          Expr::word(Value::Do),
+          vec![
+            Expr::apply(
+            Expr::word(Value::toString("outputln")),
+            Vec::from([args[0].clone()]),
+        )
+          ]
+        ), scope);
+
+        return Value::Bool(true)
+     });
 
         return Self { map: temp };
     }
