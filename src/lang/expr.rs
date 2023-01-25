@@ -42,6 +42,18 @@ impl Value {
     pub fn toInt(s: &str) -> Value {
         Value::Int(s.parse::<i32>().unwrap())
     }
+
+    pub fn get_type(&self) -> String {
+        match self {
+            Value::Int(_x) => format!("int"),
+            //Value::Float(x) => vec!("f:".to_string(), x.to_string()).join(" "),
+            Value::String(_x) => format!("string"),
+            Value::Bool(_x) => format!("bool"),
+            Value::Do => format!("do"),
+            Value::End => format!("end"),
+            Value::None => format!("none"),
+        }
+    } 
 }
 
 impl fmt::Debug for Value {

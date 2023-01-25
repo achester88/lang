@@ -4,13 +4,13 @@ while(i < 101) {
   int five = i % 5;
   int three = i % 3;
   if (!five == 0 && !three == 0) {
-    mes = mes += i;
+    string mes = mes + i;
   }
   if (three == 0) {
-    mes = mes += "Fizz";
+    string mes = mes + "Fizz";
   }
   if (five == 0) {
-    mes = mes +="Buzz"
+    string mes = mes + "Buzz";
   }
   outputln(mes)
   int i = i + 1;

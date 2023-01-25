@@ -12,9 +12,7 @@ The following data types are currently supported in lang
 Supported types:
 - bool 
 - int
-
-Unsupported types:
-- String
+- string
 
 ## Supported Operations
 ---
@@ -22,6 +20,15 @@ Unsupported types:
 `intager symbol intager`
 
     / - + * %
+
+## Strings
+---
+String uses the `"value"` format
+
+Suported operations:
+- string + string
+- string * int
+
 ## Logic
 ---
 ### comparison
