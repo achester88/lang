@@ -183,7 +183,8 @@ impl Lexer {
 
               expr = match self.dict.getfn(self.key.clone()) {
                 Ok(f) => f(self.current.clone()),
-                Err(()) => { println!("error");
+                Err(()) => { 
+                println!("error");
                   Expr::apply(
                     Expr::word(Value::String(self.key.clone())),
                     self.current.clone(),

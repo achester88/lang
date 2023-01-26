@@ -213,6 +213,10 @@ impl Tokenizer {
                 self.current.push(self.char[self.i]);
                 self.current_type = self.get_type(&self.char[self.i].to_string());
             } else {
+                if self.char[self.i] == '(' ||  self.char[self.i] == ')' || self.char[self.i] == '{' || self.char[self.i] == '}' {
+                    self.current.push(self.char[self.i]);
+                    self.push_current();
+                }
                 let t: Type = self.get_type(&self.char[self.i].to_string());
                 if t == self.current_type {
                     self.current.push(self.char[self.i]);
