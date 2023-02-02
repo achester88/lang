@@ -83,7 +83,10 @@ impl Tokenizer {
         let control = ["if", "while", "else", "fn"];
         let key = ["int", "bool", "string"];
 
-        if input == "\n" {
+        
+        if input == "" {
+          self.error_handler.throw_error("Empty at get_type".to_string());
+        }  else if input == "\n" {
             return Type::NEWL;
         }
 
@@ -139,10 +142,10 @@ impl Tokenizer {
         self.current_type = self.get_type(&self.char[self.i].to_string());
         self.error_handler.forwards(1);
         while self.i < self.char.len() {
-            //println!("---------------");
+            //println!("s-----[{}]-------", self.char[self.i]);
             //println!("{}", self.i);
             self.advance();
-            //println!("---------------");
+            //println!("e--------------");
         }
         if self.current.len() > 0 {
             self.push_current();
@@ -186,7 +189,7 @@ impl Tokenizer {
                 self.push_current();
             }
             self.lines_expr
-                .push(expr::Expr::sp_value(Value::End, "end"));
+                .push(expr::Expr::end());
             self.pos.push(self.error_handler.get_pos());
         } else if self.char[self.i] == ',' {
             if self.current.len() > 0 {
@@ -214,11 +217,17 @@ impl Tokenizer {
                 self.current_type = self.get_type(&self.char[self.i].to_string());
             } else {
                 if self.char[self.i] == '(' ||  self.char[self.i] == ')' || self.char[self.i] == '{' || self.char[self.i] == '}' {
+                    if self.current.len() > 0 {
+                    self.push_current();
+                    self.i_forward();
+                    }
                     self.current.push(self.char[self.i]);
                     self.push_current();
+                    //println!("p {:?}", self.char[self.i]);
+                    self.i_forward();
+                    //println!("a {:?}", self.char[self.i]);
                 }
-                let t: Type = self.get_type(&self.char[self.i].to_string());
-                if t == self.current_type {
+                else if self.get_type(&self.char[self.i].to_string()) == self.current_type {
                     self.current.push(self.char[self.i]);
                 } else {
                     self.push_current();

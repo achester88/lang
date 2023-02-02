@@ -10,11 +10,11 @@ use expr::*;
 use lang::*;
 
 fn main() -> Result<(), ()> {
-     /*
+     ///*
     panic::set_hook(Box::new(|_info| {
         // do nothing
     }));
-     */
+     //*/
     //env_logger::init();
     /*
         error: The following required arguments were not provided:
@@ -69,20 +69,20 @@ fn main() -> Result<(), ()> {
     let mut tok = tokenizer::Tokenizer::new(content, con.clone());
     let (token_stream, pos) = tok.make_tokens(); // create preprocesser to check that all ( and { have matches and for () to make bool or int
 
-    println!("stream: {:#?}", token_stream);
+    //println!("stream: {:#?}", token_stream);
     let mut prepro = preprocesser::Preprocesser::new(token_stream, &pos, con);
     let processed_stream = prepro.process();
         
     let mut lex = lexer::Lexer::new(processed_stream);
     let tree = lex.tree();
-    println!("tr {:?}", tree);
+    //println!("tr {:?}", tree);
     let special_forms = specialforms::Specialforms::new();
 
     let mut eval = evaluate::Evaluate {
         special_forms: special_forms,
     };
 
-    let mut scope: HashMap<String, Value> = HashMap::new();
+    let mut scope = scope::Scope::new();
 
     eval.evaluate(tree, &mut scope); // for each value check if needed +-/* or bool
     Ok(())

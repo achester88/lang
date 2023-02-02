@@ -46,13 +46,13 @@ impl Lexer {
         //println!("==========parse==========s");
         while self.i < self.source.len() {
             //if !self.ce.value.clone().is_none() {
-            //println!("----------{:#?}----{}-----", self.ce, self.i);
+            //println!("s---------{:?}----{}-----", self.ce, self.i);
             //}
             self.ce = self.source[self.i].clone();
             self.count();
             self.next();
             if !self.ce.value.clone().is_none() {
-                //println!("----------{:#?}----{}-----", self.ce, self.i);
+                //println!("e---------{:?}----{}-----", self.ce, self.i);
             }
             self.i += 1;
         }
@@ -110,6 +110,9 @@ impl Lexer {
         if !self.ce.operator.is_none()
             && self.ce.get_operator().get_value() == Value::toString("ctrl")
         {
+            if self.ce.get_value() == Value::toString("fn") {
+              self.temp.push(self.source[self.i + 1].clone());
+            }
             self.key = self.ce.get_value().to_string();
             self.is_control = true;
         } else if self.value_match() {
@@ -163,7 +166,24 @@ impl Lexer {
                             self.i += 1;
                             self.ce = self.source[self.i].clone();
                         }
+                        } else if Value::String(self.key.clone()) == Value::toString("fn") {
+                          /*println!("name: {:?},\n stat: {:?},\n args: {:?}\n", 
+                                   self.temp[0].get_value(),
+                                   self.temp[1],
+                                   self.temp[2].get_args()
+                                  );*/
+                          self.list.push(                                                          self.dict.makefn(
+                            self.temp[0].get_value(),
+                            self.temp[1].clone(), 
+                            self.temp[2].get_args().clone()) 
+                          );
+        
+                          self.current = vec![];
+                          self.is_control = false;
+                          self.match_c = '(';
+                          self.temp = vec![];                      
                         } else {
+                          
                           self.list.push(self.dict.getfns(self.key.clone())(self.temp.clone()));
                             self.current = vec![];
                             self.is_control = false;
@@ -178,21 +198,18 @@ impl Lexer {
             } else {
                 //println!("-----####--{:#?}", self.current.clone());
               //println!("{:?}", self.key.clone());
-
-              let mut expr: Expr;
-
-              expr = match self.dict.getfn(self.key.clone()) {
-                Ok(f) => f(self.current.clone()),
-                Err(()) => { 
-                println!("error");
-                  Expr::apply(
-                    Expr::word(Value::String(self.key.clone())),
-                    self.current.clone(),
-                  )}
-              };
-              
-                self.list
-                    .push(expr);
+                match self.dict.getfn(self.key.clone()) {
+                  Some(f) => self.list.push( f(self.current.clone()) ),
+                  None => {
+                      //println!("");
+                    self.list.push(
+                      Expr::apply(Expr::word(Value::String(self.key.clone())), 
+                        self.current.clone()
+                      ));
+                  }
+                }
+                //self.list
+                //    .push(self.dict.getfns(self.key.clone())(self.current.clone()));
                 self.current = vec![];
                 self.match_c = '(';
               

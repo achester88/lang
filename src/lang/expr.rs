@@ -55,7 +55,7 @@ impl Value {
             Value::End => format!("end"),
             Value::None => format!("none"),
         }
-    } 
+    }
 }
 
 impl fmt::Debug for Value {
@@ -79,6 +79,7 @@ pub enum Type {
     Value,
     Word,
     None,
+    List,
 }
 
 impl Type {
@@ -88,6 +89,7 @@ impl Type {
             Type::Apply => "apply".to_string(),
             Type::Value => "value".to_string(),
             Type::Word => "word".to_string(),
+            Type::List => "list".to_string(),
             Type::None => "none".to_string(),
         }
     }
@@ -101,6 +103,7 @@ pub struct Expr {
     pub value: Value,
 }
 
+pub type EFn = (Expr, Vec<(String, Value)>);
 /*
 #[derive(Clone, PartialEq)]
 
@@ -120,7 +123,8 @@ impl Expr {
         return self.type_of.clone();
     }
     pub fn get_args(&self) -> Vec<Expr> {
-        return self.args.as_ref().as_ref().unwrap().clone();
+        //println!("{:?}", self.clone());
+        self.args.as_ref().as_ref().unwrap().clone()
     }
     pub fn get_operator(&self) -> Expr {
         return self.operator.as_ref().as_ref().unwrap().clone();
@@ -187,6 +191,10 @@ impl Expr {
             operator: Box::new(None),
             args: Box::new(None),
         };
+    }
+
+    pub fn end() -> Self {
+      Expr::sp_value(Value::End, "end")
     }
 
     pub fn to_string(&self) -> String {

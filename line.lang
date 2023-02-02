@@ -1,3 +1,6 @@
-fn hello () {
-  output("hi");
+fn power(int i) {
+  int val = i * i;
+  outputln(val);
 }
+
+power(9);

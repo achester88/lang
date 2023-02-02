@@ -9,7 +9,7 @@ pub struct Dict {
 
 impl Dict {
     pub fn value_int(part: Vec<Expr>) -> Expr {
-      //println!("part: {:#?}", part);
+        //println!("part: {:#?}", part);
         if part.len() == 1 {
             return part[0].clone();
         } else {
@@ -161,7 +161,6 @@ impl Dict {
             }
             return Dict::value_bool(new_part);
         }
-      
     }
 
     pub fn value_string(part: Vec<Expr>) -> Expr {
@@ -279,10 +278,12 @@ impl Dict {
     }
 
     pub fn fnif(args: Vec<Expr>) -> Expr {
-        //println!("{:?}\n---------------------", args);
+        println!("{:?}\n---------------------", args);
         let mut exprs = args.clone();
         let stat = exprs.remove(0);
-        let cond = Dict::value_bool(exprs.remove(0).get_args());
+        let to_par = exprs.remove(0).get_args();
+        println!("|{:?}|", to_par.clone());
+        let cond = Dict::value_bool(to_par);
         if exprs.len() != 0 {
             return Expr::apply(
                 Expr::word(Value::toString("if")),
@@ -294,30 +295,25 @@ impl Dict {
     pub fn fnwhile(args: Vec<Expr>) -> Expr {
         Expr::apply(
             Expr::word(Value::toString("while")),
-            vec![ Dict::value_bool(args[1].clone().get_args()), args[0].clone()],
+            vec![
+                Dict::value_bool(args[1].clone().get_args()),
+                args[0].clone(),
+            ],
         )
     }
 
-    pub fn fnfn(args: Vec<Expr>) -> Expr {
-      println!("{:?}", args);
-      return Expr::empty();
-    }
-    
     //-----------------------------------------------------------------------
 
-    pub fn getfn(&self, s: String) -> Result< fn(Vec<Expr>) -> Expr, () > {
+    pub fn getfn(&self, s: String) -> Option<fn(Vec<Expr>) -> Expr> {
         //println!("{}", s);
         let (fun, _size) = match self.map.get(&s) {
             Some(f) => *f,
-            None => return Err(())//(*self.map.get("defualt").unwrap())
-                //println!("undefied fn {:?}", s);
-                //panic!()
-            
+            None => return None,
         };
-        return Ok(fun);
+        return Some(fun);
     }
 
-      pub fn getfns(&self, s: String) -> fn(Vec<Expr>) -> Expr {
+    pub fn getfns(&self, s: String) -> fn(Vec<Expr>) -> Expr {
         //println!("{}", s);
         let (fun, _size) = match self.map.get(&s) {
             Some(f) => *f,
@@ -325,25 +321,40 @@ impl Dict {
                 println!("undefied fn {:?}", s);
                 panic!()
             }
-            
         };
         return fun;
     }
 
-  /*
-    pub fn get(&self, s: String) -> (fn(Vec<Expr>) -> Expr, usize) {
-        //println!("S: {}", s);
-        match self.map.get(&s) {
-            Some(f) => return *f,
-            None => {
-                return *self.map.get("defualt").unwrap();
-                //println!("undefied fn {:?}", s);
-                //panic!()
-            }
-        };
+    pub fn makefn(&self, name: Value, stat: Expr, args: Vec<Expr>) -> Expr {
+        Expr::apply(
+            Expr::word(Value::toString("_!makefn")),
+            vec![
+                Expr::word(name),
+                stat,
+                Expr {
+                    type_of: Type::List,
+                    operator: Box::new(None),
+                    args: Box::new(Some(args)),
+                    value: Value::Do,
+                },
+            ],
+        )
     }
-*/
-  
+
+    /*
+        pub fn get(&self, s: String) -> (fn(Vec<Expr>) -> Expr, usize) {
+            //println!("S: {}", s);
+            match self.map.get(&s) {
+                Some(f) => return *f,
+                None => {
+                    return *self.map.get("defualt").unwrap();
+                    //println!("undefied fn {:?}", s);
+                    //panic!()
+                }
+            };
+        }
+    */
+
     pub fn new() -> Self {
         let mut temp: HashMap<_, (fn(Vec<Expr>) -> Expr, usize)> = HashMap::new();
         temp.insert("int".to_string(), (Dict::fnint, 4));
@@ -354,9 +365,8 @@ impl Dict {
         temp.insert("sleep".to_string(), (Dict::fnsleep, 2));
         temp.insert("if".to_string(), (Dict::fnif, 2));
         temp.insert("while".to_string(), (Dict::fnwhile, 2));
-        temp.insert("fn".to_string(), (Dict::fnfn, 0));
         temp.insert("value_bool".to_string(), (Dict::value_bool, 0));
 
-      return Self { map: temp };
+        return Self { map: temp };
     }
 }

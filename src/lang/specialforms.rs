@@ -6,6 +6,7 @@ use std::{thread, time};
 //use crate::parser;
 use crate::evaluate;
 use crate::expr;
+use crate::scope::*;
 
 //#[path = "parser.rs"]
 //pub mod parser;
@@ -21,7 +22,7 @@ use expr::*;
 pub struct Specialforms {
     pub map: HashMap<
         String,
-        fn(&mut evaluate::Evaluate, &Vec<Expr>, &mut HashMap<String, Value>) -> Value,
+        fn(&mut evaluate::Evaluate, &Vec<Expr>, &mut Scope) -> Value,
     >,
 }
 
@@ -31,7 +32,7 @@ impl Specialforms {
     pub fn outputln(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (1 as usize) {
             println!("Incorrect number of args at out");
@@ -53,7 +54,7 @@ impl Specialforms {
     pub fn output(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (1 as usize) {
             println!("Incorrect number of args at out");
@@ -71,20 +72,20 @@ impl Specialforms {
         io::stdout().flush().unwrap();
         return Value::Bool(true);
     }
-      pub fn sleep(
+    pub fn sleep(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (1 as usize) {
             println!("Incorrect number of args at sleep");
             panic!();
         }
         match eval.evaluate(args[0].clone(), scope) {
-          Value::Int(i) => {
-    thread::sleep(time::Duration::from_millis(i as u64));
-          }
-           _ => {
+            Value::Int(i) => {
+                thread::sleep(time::Duration::from_millis(i as u64));
+            }
+            _ => {
                 println!("Unexpected types at +");
                 panic!();
             }
@@ -95,25 +96,25 @@ impl Specialforms {
     pub fn fnif(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
-          //println!("{:?}", args);
+        //println!("{:?}", args);
         //if args.len() != (2 as usize) {
-          //  println!("Incorrect number of args at if");
-         //   panic!();
+        //  println!("Incorrect number of args at if");
+        //   panic!();
         if eval.evaluate(args[0].clone(), scope) == Value::Bool(true) {
             return eval.evaluate(args[1].clone(), scope);
         } else if args.len() == 3 {
             //println!("~ {:?} ~\n", args[2].clone());
-            return  eval.evaluate(args[2].clone(), scope);
-          }
+            return eval.evaluate(args[2].clone(), scope);
+        }
         return Value::Bool(false);
     }
 
     pub fn fnwhile(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (2 as usize) {
             println!("Incorrect number of args at while");
@@ -129,7 +130,7 @@ impl Specialforms {
     pub fn fndo(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let mut value = Value::Bool(false);
         for arg in args {
@@ -142,7 +143,7 @@ impl Specialforms {
     pub fn fnint(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (2 as usize) || args[0].type_of != Type::Word {
             println!("Incorrect number of args at define");
@@ -166,7 +167,7 @@ impl Specialforms {
     pub fn fnbool(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (2 as usize) || args[0].type_of != Type::Word {
             println!("Incorrect number of args at define");
@@ -190,7 +191,7 @@ impl Specialforms {
     pub fn fnstring(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (2 as usize) || args[0].type_of != Type::Word {
             println!("Incorrect number of args at string");
@@ -213,7 +214,7 @@ impl Specialforms {
     pub fn fnadd(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (2 as usize) {
             println!("Incorrect number of args at math op");
@@ -226,18 +227,22 @@ impl Specialforms {
         match (&arg1, &arg2) {
             (Value::String(s1), Value::String(s2)) => {
                 return Value::String(s1.to_string() + &s2);
-            },
+            }
             (Value::Int(i1), Value::String(s2)) => {
                 return Value::String(i1.to_string() + &s2);
-            },
+            }
             (Value::String(s1), Value::Int(i2)) => {
                 return Value::String(s1.to_string() + &i2.to_string());
-            },
+            }
             (Value::Int(i1), Value::Int(i2)) => {
                 return Value::Int(i1 + i2);
-            },
+            }
             _ => {
-                println!("Unexpected types at +, can't add {} and {}", arg1.get_type(), arg2.get_type());
+                println!(
+                    "Unexpected types at +, can't add {} and {}",
+                    arg1.get_type(),
+                    arg2.get_type()
+                );
                 panic!();
             }
         }
@@ -246,7 +251,7 @@ impl Specialforms {
     pub fn fnsub(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let (i1, i2) = Specialforms::check(eval, args, scope);
         return Value::Int(i1 - i2);
@@ -254,13 +259,12 @@ impl Specialforms {
     pub fn fnmut(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
+        let arg1 = eval.evaluate(args[0].clone(), scope);
+        let arg2 = eval.evaluate(args[1].clone(), scope);
 
-      let arg1 = eval.evaluate(args[0].clone(), scope);
-      let arg2 = eval.evaluate(args[1].clone(), scope);
-
-      match (arg1, arg2) {
+        match (arg1, arg2) {
             (Value::String(s1), Value::Int(s2)) => {
                 return Value::String(s1.repeat(s2 as usize));
             }
@@ -276,7 +280,7 @@ impl Specialforms {
     pub fn fndiv(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let (i1, i2) = Specialforms::check(eval, args, scope);
         return Value::Int(i1 / i2);
@@ -285,7 +289,7 @@ impl Specialforms {
     pub fn fnmod(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let (i1, i2) = Specialforms::check(eval, args, scope);
         return Value::Int(i1 % i2);
@@ -294,7 +298,7 @@ impl Specialforms {
     pub fn fneq(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let (i1, i2) = Specialforms::check(eval, args, scope);
         return Value::Bool(i1 == i2);
@@ -303,7 +307,7 @@ impl Specialforms {
     pub fn fnneq(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let (i1, i2) = Specialforms::check(eval, args, scope);
         return Value::Bool(i1 != i2);
@@ -312,7 +316,7 @@ impl Specialforms {
     pub fn fngt(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let (i1, i2) = Specialforms::check(eval, args, scope);
         return Value::Bool(i1 > i2);
@@ -321,7 +325,7 @@ impl Specialforms {
     pub fn fnlt(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         let (i1, i2) = Specialforms::check(eval, args, scope);
         return Value::Bool(i1 < i2);
@@ -330,7 +334,7 @@ impl Specialforms {
     pub fn fnand(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (2 as usize) {
             println!("Incorrect number of args at define");
@@ -349,7 +353,7 @@ impl Specialforms {
     pub fn fnor(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (2 as usize) {
             println!("Incorrect number of args at define");
@@ -368,7 +372,7 @@ impl Specialforms {
     pub fn fnnot(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> Value {
         if args.len() != (1 as usize) {
             println!("Incorrect number of args at define");
@@ -383,13 +387,23 @@ impl Specialforms {
         }
     }
 
+    pub fn makefn(
+        eval: &mut evaluate::Evaluate,
+        args: &Vec<Expr>,
+        scope: &mut Scope,
+    ) -> Value {
+      //             name     stat     args
+        scope.makefn(args[0].get_value().to_string(), args[1].clone(), args[2].get_args());
+        return Value::Bool(true);
+    }
+
     //---------------------------------------------------------
     //---------------------------------------------------------
 
     pub fn check(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value>,
+        scope: &mut Scope,
     ) -> (i32, i32) {
         if args.len() != (2 as usize) {
             println!("Incorrect number of args at math op");
@@ -409,7 +423,7 @@ impl Specialforms {
     pub fn get(
         &self,
         s: &str,
-    ) -> fn(&mut evaluate::Evaluate, &Vec<Expr>, &mut HashMap<String, Value>) -> Value {
+    ) -> fn(&mut evaluate::Evaluate, &Vec<Expr>, &mut Scope) -> Value {
         match self.map.get(s) {
             Some(f) => return *f,
             None => panic!(),
@@ -419,7 +433,7 @@ impl Specialforms {
     pub fn new() -> Self {
         let mut temp: HashMap<
             _,
-            fn(&mut evaluate::Evaluate, &Vec<Expr>, &mut HashMap<String, Value>) -> Value,
+            fn(&mut evaluate::Evaluate, &Vec<Expr>, &mut Scope) -> Value,
         > = HashMap::new();
 
         temp.insert("output".to_string(), Specialforms::output);
@@ -443,24 +457,28 @@ impl Specialforms {
         temp.insert("&&".to_string(), Specialforms::fnand);
         temp.insert("||".to_string(), Specialforms::fnor);
         temp.insert("!".to_string(), Specialforms::fnnot);
+        temp.insert("_!makefn".to_string(), Specialforms::makefn);
 
-        temp.insert("hi".to_string(), | eval: &mut evaluate::Evaluate,
-        args: &Vec<Expr>,
-        scope: &mut HashMap<String, Value> |
-     -> Value {
-       eval.evaluate(
-        Expr::apply(
-          Expr::word(Value::Do),
-          vec![
-            Expr::apply(
-            Expr::word(Value::toString("outputln")),
-            Vec::from([args[0].clone()]),
-        )
-          ]
-        ), scope);
+        temp.insert(
+            "hi".to_string(),
+            |eval: &mut evaluate::Evaluate,
+             args: &Vec<Expr>,
+             scope: &mut Scope|
+             -> Value {
+                eval.evaluate(
+                    Expr::apply(
+                        Expr::word(Value::Do),
+                        vec![Expr::apply(
+                            Expr::word(Value::toString("outputln")),
+                            Vec::from([args[0].clone()]),
+                        )],
+                    ),
+                    scope,
+                );
 
-        return Value::Bool(true)
-     });
+                return Value::Bool(true);
+            },
+        );
 
         return Self { map: temp };
     }

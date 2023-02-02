@@ -6,6 +6,7 @@ pub mod dict;
 pub mod tokenizer;
 pub mod errorhandler;
 pub mod preprocesser;
+pub mod scope;
 
 pub fn output_pos(pos: Vec<(u32, u32)>, content: String) {
     //println!("{:?}", pos);
