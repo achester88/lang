@@ -54,19 +54,19 @@ impl Tokenizer {
     pub fn make_expr(&mut self, input: &str) -> Expr {
         let tp = self.get_type(&input);
         return match tp {
-            Type::String => Expr::value(Value::toString(&input)),
-            Type::Number => Expr::value(Value::toInt(&input)),
-            Type::Punc => Expr::sp_word(Value::toString(&input), "punc"),
-            Type::Asgmt => Expr::sp_word(Value::toString(&input), "asgmt"),
-            Type::Par => Expr::sp_value(Value::toString(&input), "par"),
-            Type::Sasgmt => Expr::sp_word(Value::toString(&input), "sasgmt"),
-            Type::Comp => Expr::sp_word(Value::toString(&input), "comp"),
-            Type::Log => Expr::sp_word(Value::toString(&input), "log"),
-            Type::Math => Expr::sp_word(Value::toString(&input), "math"),
-            Type::Bool => Expr::sp_value(Value::toBool(&input), "bool"),
-            Type::Ctrl => Expr::sp_word(Value::toString(&input), "ctrl"),
-            Type::Key => Expr::sp_value(Value::toString(&input), "key"),
-            _ => Expr::word(Value::toString(&input)),
+            Type::String => Expr::value(Value::to_stringv(&input)),
+            Type::Number => Expr::value(Value::to_intv(&input)),
+            Type::Punc => Expr::sp_word(Value::to_stringv(&input), "punc"),
+            Type::Asgmt => Expr::sp_word(Value::to_stringv(&input), "asgmt"),
+            Type::Par => Expr::sp_value(Value::to_stringv(&input), "par"),
+            Type::Sasgmt => Expr::sp_word(Value::to_stringv(&input), "sasgmt"),
+            Type::Comp => Expr::sp_word(Value::to_stringv(&input), "comp"),
+            Type::Log => Expr::sp_word(Value::to_stringv(&input), "log"),
+            Type::Math => Expr::sp_word(Value::to_stringv(&input), "math"),
+            Type::Bool => Expr::sp_value(Value::to_boolv(&input), "bool"),
+            Type::Ctrl => Expr::sp_word(Value::to_stringv(&input), "ctrl"),
+            Type::Key => Expr::sp_value(Value::to_stringv(&input), "key"),
+            _ => Expr::word(Value::to_stringv(&input)),
         };
     }
 
@@ -171,7 +171,7 @@ impl Tokenizer {
             if self.is_string {
                 //println!("{:#?}", self.current);
                 let input: &str = &self.current.iter().collect::<String>();
-                let expr = Expr::value(Value::toString(&input));
+                let expr = Expr::value(Value::to_stringv(&input));
                 self.lines_expr.push(expr);
                 self.pos.push(self.error_handler.get_pos());
                 self.current = vec![];

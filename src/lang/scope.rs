@@ -28,14 +28,14 @@ impl Scope {
     self.vmap.insert(name, val);
   }
 
-  fn toParam(nameOf: &Expr, typeOf: &Expr) -> (String, Value) {
-    let name = nameOf.get_value();
-    match typeOf.get_value().to_string().as_str() {
+  fn to_param(name_of: &Expr, type_of: &Expr) -> (String, Value) {
+    let name = name_of.get_value();
+    match type_of.get_value().to_string().as_str() {
       "int" => (name.to_string(), Value::Int(0)),
-      "string" => (name.to_string(), Value::toString("")),
+      "string" => (name.to_string(), Value::to_stringv("")),
       "bool" => (name.to_string(), Value::Bool(false)),
       _ => {
-        println!("Unknown type {} at fn defintion", &typeOf.get_value().to_string());
+        println!("Unknown type {} at fn defintion", &type_of.get_value().to_string());
         panic!()
       }
     }
@@ -48,7 +48,7 @@ impl Scope {
     }
     let mut params: Vec<(String, Value)> = vec!();
     for pair in cond.chunks(2) {
-      params.push(Scope::toParam(&pair[1], &pair[0]));
+      params.push(Scope::to_param(&pair[1], &pair[0]));
     }
     self.fnmap.insert(name, (stat, params));
   }

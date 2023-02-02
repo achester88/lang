@@ -1,7 +1,3 @@
-
-use std::collections::HashMap;
-//use std::ops::Deref;
-
 use crate::specialforms;
 
 use crate::expr::*;

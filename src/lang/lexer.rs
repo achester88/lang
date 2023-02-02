@@ -63,16 +63,16 @@ impl Lexer {
 
     pub fn count(&mut self) {
         //count ) and }
-        if self.ce.get_value() == Value::toString("(") {
+        if self.ce.get_value() == Value::to_stringv("(") {
             self.pc += 1;
         }
-        if self.ce.get_value() == Value::toString(")") {
+        if self.ce.get_value() == Value::to_stringv(")") {
             self.pc -= 1;
         }
-        if self.ce.get_value() == Value::toString("{") {
+        if self.ce.get_value() == Value::to_stringv("{") {
             self.bc += 1;
         }
-        if self.ce.get_value() == Value::toString("}") {
+        if self.ce.get_value() == Value::to_stringv("}") {
             self.bc -= 1;
         }
     }
@@ -88,10 +88,10 @@ impl Lexer {
     pub fn start(&mut self) {
         //check of op == ctrl
         if !self.ce.operator.is_none()
-            && self.ce.get_operator().get_value() == Value::toString("key")
+            && self.ce.get_operator().get_value() == Value::to_stringv("key")
         {
             while self.ce.operator.is_none()
-                || !(self.ce.get_operator().get_value() == Value::toString("end"))
+                || !(self.ce.get_operator().get_value() == Value::to_stringv("end"))
             {
                 //println!("e");
                 self.ce = self.source[self.i].clone();
@@ -108,9 +108,9 @@ impl Lexer {
         }
       
         if !self.ce.operator.is_none()
-            && self.ce.get_operator().get_value() == Value::toString("ctrl")
+            && self.ce.get_operator().get_value() == Value::to_stringv("ctrl")
         {
-            if self.ce.get_value() == Value::toString("fn") {
+            if self.ce.get_value() == Value::to_stringv("fn") {
               self.temp.push(self.source[self.i + 1].clone());
             }
             self.key = self.ce.get_value().to_string();
@@ -134,7 +134,7 @@ impl Lexer {
             if self.is_control {
                 if self.match_c == ')' {
                     self.match_c = '{';
-                    self.cond = Expr::apply(Expr::word(Value::toString("eval_bool")), self.current.clone());
+                    self.cond = Expr::apply(Expr::word(Value::to_stringv("eval_bool")), self.current.clone());
                     self.current = vec![];
                 } else if self.match_c == '}' {
                     if self.bc == 0 {
@@ -148,10 +148,10 @@ impl Lexer {
                           temp.push(self.current[i].clone());
                         } */
                         if self.i + 1 < self.source.len()
-                            && self.source[self.i + 1].clone().get_value() == Value::toString("else")
+                            && self.source[self.i + 1].clone().get_value() == Value::to_stringv("else")
                         {
                             if self.i + 2 < self.source.len()
-                            && self.source[self.i + 2].clone().get_value() == Value::toString("if") {
+                            && self.source[self.i + 2].clone().get_value() == Value::to_stringv("if") {
                             //println!("else in lex");
                             self.current = vec![];
                             self.is_control = true;
@@ -166,7 +166,7 @@ impl Lexer {
                             self.i += 1;
                             self.ce = self.source[self.i].clone();
                         }
-                        } else if Value::String(self.key.clone()) == Value::toString("fn") {
+                        } else if Value::String(self.key.clone()) == Value::to_stringv("fn") {
                           /*println!("name: {:?},\n stat: {:?},\n args: {:?}\n", 
                                    self.temp[0].get_value(),
                                    self.temp[1],

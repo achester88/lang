@@ -31,17 +31,17 @@ impl Value {
         self == Value::None
     }
 
-    pub fn toString(s: &str) -> Value {
+    pub fn to_stringv(s: &str) -> Value {
         Value::String(s.to_string())
     }
-    pub fn toBool(s: &str) -> Value {
+    pub fn to_boolv(s: &str) -> Value {
         match s {
             "true" => Value::Bool(true),
             "false" => Value::Bool(false),
             _ => Value::None,
         }
     }
-    pub fn toInt(s: &str) -> Value {
+    pub fn to_intv(s: &str) -> Value {
         Value::Int(s.parse::<i32>().unwrap())
     }
 
@@ -212,7 +212,7 @@ impl Expr {
 impl fmt::Debug for Expr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let type_of = self.get_type();
-        let mut op = Value::toString("");
+        let mut op = Value::to_stringv("");
         let mut t;
         if !self.operator.is_none() {
             t = self.get_operator();
@@ -223,7 +223,7 @@ impl fmt::Debug for Expr {
         if !self.args.is_none() {
             args = self.get_args();
         }
-        let mut val = Value::toString("");
+        let mut val = Value::to_stringv("");
         if !self.value.clone().is_none() {
             let v = self.get_value();
             val = v;

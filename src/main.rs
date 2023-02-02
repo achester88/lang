@@ -6,11 +6,10 @@ use std::env;
 use std::panic;
 
 mod lang;
-use expr::*;
 use lang::*;
 
 fn main() -> Result<(), ()> {
-     ///*
+     //*
     panic::set_hook(Box::new(|_info| {
         // do nothing
     }));
@@ -58,7 +57,7 @@ fn main() -> Result<(), ()> {
     let mut content: String;
     match std::fs::read_to_string(path) {
         Ok(x) => content = x,
-        Err(E) => {
+        Err(_e) => {
             println!("could not read file `{}`", path);
             panic!();
         }

@@ -388,7 +388,7 @@ impl Specialforms {
     }
 
     pub fn makefn(
-        eval: &mut evaluate::Evaluate,
+        _eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
         scope: &mut Scope,
     ) -> Value {
@@ -469,7 +469,7 @@ impl Specialforms {
                     Expr::apply(
                         Expr::word(Value::Do),
                         vec![Expr::apply(
-                            Expr::word(Value::toString("outputln")),
+                            Expr::word(Value::to_stringv("outputln")),
                             Vec::from([args[0].clone()]),
                         )],
                     ),
