@@ -70,7 +70,26 @@ Example:
         statement
     }
 ```
+## Functions
+---
+functions are defined with the fn keyword like so:
+```
+fn foo() {
+    outputln("hello functions");
+}
+```
+they can be call by there name followed by opening and closing brackets:
+```
+foo();
+```
+functions additional can take in parameter of they three built in types by using *type name* format. they can then be accessed as predefined variables:
+```
+fn foo(bool b, int i, string s) {
+    outputln(s);
+}
 
+foo(true, 0, "hello functions");
+```
 ## Built-In Methods
 ---
 `sleep(ms: number)` Sleep for defined milliseconds

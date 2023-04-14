@@ -93,6 +93,19 @@ impl Specialforms {
         return Value::Bool(true);
     }
 
+    pub fn spreturn(
+        eval: &mut evaluate::Evaluate,
+        args: &Vec<Expr>,
+        scope: &mut Scope,
+    ) -> Value { //maybe use a do to excute then get restults
+        if args.len() != (1 as usize) {
+            println!("Incorrect number of args at return");
+            panic!();
+        }
+        //return args[0].value.clone();
+        return eval.evaluate(args[0].clone(), scope);
+    }
+
     pub fn fnif(
         eval: &mut evaluate::Evaluate,
         args: &Vec<Expr>,
@@ -136,6 +149,10 @@ impl Specialforms {
         for arg in args {
             //println!("arg: {:#?}", arg);
             value = eval.evaluate(arg.clone(), scope);
+            if arg.get_operator().get_value() == Value::String(String::from("return")) {
+                break;
+            }
+            //println!("{:?}", ); //check if args == return if so break
         }
         return value;
     }
@@ -439,6 +456,7 @@ impl Specialforms {
         temp.insert("output".to_string(), Specialforms::output);
         temp.insert("outputln".to_string(), Specialforms::outputln);
         temp.insert("sleep".to_string(), Specialforms::sleep);
+        temp.insert("return".to_string(), Specialforms::spreturn);
         temp.insert("if".to_string(), Specialforms::fnif);
         temp.insert("while".to_string(), Specialforms::fnwhile);
         temp.insert("do".to_string(), Specialforms::fndo);

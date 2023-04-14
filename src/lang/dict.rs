@@ -1,4 +1,4 @@
-use crate::expr;
+use crate::{expr, lang::lexer::Lexer};
 use expr::*;
 use std::collections::HashMap;
 
@@ -219,9 +219,19 @@ impl Dict {
     //-----------------------------------------------------------------------
 
     pub fn fnint(args: Vec<Expr>) -> Expr {
+        let mut pre = args.clone()[3..].to_vec();
+        pre.push(Expr::end());
+        println!("args: {:#?}", pre);
+        println!("---------------");
+        let lexed = Lexer::new(pre).tree();
+        //println!("args: {:#?}", lexed.get_args().len() > 0);
+        
         let mut list: Vec<Expr> = Vec::from([]);
         list.push(args[1].clone());
-        if args[2].get_value() == Value::to_stringv("=") {
+        if lexed.get_args().len() > 0 {
+            list.push(lexed);
+        }
+        else if args[2].get_value() == Value::to_stringv("=") {
             list.push(Dict::value_int(args[3..].to_vec()));
         } else {
             println!("Expeted = type at define");
@@ -272,6 +282,13 @@ impl Dict {
     pub fn fnsleep(args: Vec<Expr>) -> Expr {
         return Expr::apply(
             Expr::word(Value::to_stringv("sleep")),
+            Vec::from([args[0].clone()]),
+        );
+    }
+
+    pub fn fnreturn(args: Vec<Expr>) -> Expr {
+        return Expr::apply(
+            Expr::word(Value::to_stringv("return")),
             Vec::from([args[0].clone()]),
         );
     }
@@ -362,6 +379,7 @@ impl Dict {
         temp.insert("output".to_string(), (Dict::fnoutput, 2));
         temp.insert("outputln".to_string(), (Dict::fnoutputln, 2));
         temp.insert("sleep".to_string(), (Dict::fnsleep, 2));
+        temp.insert("return".to_string(), (Dict::fnreturn, 2));
         temp.insert("if".to_string(), (Dict::fnif, 2));
         temp.insert("while".to_string(), (Dict::fnwhile, 2));
         temp.insert("value_bool".to_string(), (Dict::value_bool, 0));

@@ -9,11 +9,11 @@ mod lang;
 use lang::*;
 
 fn main() -> Result<(), ()> {
-     //*
+    // /*
     panic::set_hook(Box::new(|_info| {
         // do nothing
     }));
-     //*/
+    // */
     //env_logger::init();
     /*
         error: The following required arguments were not provided:

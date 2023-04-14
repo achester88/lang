@@ -1,6 +1,8 @@
 fn power(int i) {
   int val = i * i;
-  outputln(val);
+  return(val);
+  outputln("bad");
 }
 
-power(9);
+int res = power(9);
+outputln(res);
