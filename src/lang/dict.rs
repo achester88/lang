@@ -221,8 +221,8 @@ impl Dict {
     pub fn fnint(args: Vec<Expr>) -> Expr {
         let mut pre = args.clone()[3..].to_vec();
         pre.push(Expr::end());
-        println!("args: {:#?}", pre);
-        println!("---------------");
+        //println!("args: {:#?}", pre);
+        //println!("---------------");
         let lexed = Lexer::new(pre).tree();
         //println!("args: {:#?}", lexed.get_args().len() > 0);
         
