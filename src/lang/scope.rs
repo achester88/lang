@@ -15,17 +15,17 @@ impl Scope {
     }   
   }
 
-  pub fn findget(&mut self, val: &str) -> Option<&Value> {
+  pub fn findget(&mut self, val: &str) -> Option<Value> {
     if self.vmap.contains_key(val) {
-        Some(self.vmap.get(val).unwrap())
+        Some(self.vmap.get(val).unwrap().to_owned())
         //return scope[expr.name];
       } else {
        return None;
       }
   }
 
-  pub fn insert(&mut self, name: String, val: &Value) {
-    self.vmap.insert(name, val.to_owned());
+  pub fn insert(&mut self, name: String, val: Value) {
+    self.vmap.insert(name, val);
   }
 
   fn to_param(name_of: &Expr, type_of: &Expr) -> (String, Value) {
