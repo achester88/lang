@@ -8,10 +8,10 @@ pub struct Evaluate {
 }
 
 impl Evaluate {
-  pub fn evaluate(&mut self, expr: Expr,  mut scope: &mut Scope) -> Value { //-> String
+  pub fn evaluate(&mut self, expr: Expr,  mut scope: &mut Scope) -> &Value { //-> String
   
     if expr.get_type() == Type::Value {
-      return expr.value;
+      return expr.get_value();
     } else if expr.type_of == Type::Word {
       let val = expr.value.to_string();
       //println!("{:#?}", val);
@@ -31,7 +31,7 @@ impl Evaluate {
         return self.special_forms.get(&opval)(self, &args, &mut scope);
         //return specialForms[operator.name](expr.args, scope);
       } else {
-        let mut args: Vec<Value> = vec!();
+        let mut args: Vec<&Value> = vec!();
         for e in expr.get_args() {
           args.push(e.get_value());
         }

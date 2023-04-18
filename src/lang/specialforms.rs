@@ -83,7 +83,7 @@ impl Specialforms {
         }
         match eval.evaluate(args[0].clone(), scope) {
             Value::Int(i) => {
-                thread::sleep(time::Duration::from_millis(i as u64));
+                thread::sleep(time::Duration::from_millis(i.to_owned() as u64));
             }
             _ => {
                 println!("Unexpected types at +");
@@ -115,7 +115,7 @@ impl Specialforms {
         //if args.len() != (2 as usize) {
         //  println!("Incorrect number of args at if");
         //   panic!();
-        if eval.evaluate(args[0].clone(), scope) == Value::Bool(true) {
+        if eval.evaluate(args[0].clone(), scope) == &Value::Bool(true) {
             return eval.evaluate(args[1].clone(), scope);
         } else if args.len() == 3 {
             //println!("~ {:?} ~\n", args[2].clone());
@@ -133,7 +133,7 @@ impl Specialforms {
             println!("Incorrect number of args at while");
             panic!();
         }
-        while eval.evaluate(args[0].clone(), scope) != Value::Bool(false) {
+        while eval.evaluate(args[0].clone(), scope) != &Value::Bool(false) {
             eval.evaluate(args[1].clone(), scope);
         }
 
@@ -149,7 +149,7 @@ impl Specialforms {
         for arg in args {
             //println!("arg: {:#?}", arg);
             value = eval.evaluate(arg.clone(), scope);
-            if arg.get_operator().get_value() == Value::String(String::from("return")) {
+            if arg.get_operator().get_value() == &Value::String(String::from("return")) {
                 break;
             }
             //println!("{:?}", ); //check if args == return if so break
@@ -177,7 +177,7 @@ impl Specialforms {
         }
 
         let name = args[0].get_value();
-        scope.insert(name.to_string(), value.clone());
+        scope.insert(name.to_string(), value);
         return value;
     }
 
@@ -201,7 +201,7 @@ impl Specialforms {
         }
 
         let name = args[0].get_value();
-        scope.insert(name.to_string(), value.clone());
+        scope.insert(name.to_string(), value);
         return value;
     }
 
@@ -224,7 +224,7 @@ impl Specialforms {
         }
 
         let name = args[0].get_value();
-        scope.insert(name.to_string(), value.clone());
+        scope.insert(name.to_string(), value);
         return value;
     }
 
@@ -283,7 +283,7 @@ impl Specialforms {
 
         match (arg1, arg2) {
             (Value::String(s1), Value::Int(s2)) => {
-                return Value::String(s1.repeat(s2 as usize));
+                return Value::String(s1.repeat(s2.to_owned() as usize));
             }
             (Value::Int(i1), Value::Int(i2)) => {
                 return Value::Int(i1 * i2);
@@ -360,7 +360,7 @@ impl Specialforms {
 
         let arg1 = eval.evaluate(args[0].clone(), scope);
         let arg2 = eval.evaluate(args[1].clone(), scope);
-        if arg1 == Value::Bool(true) && arg2 == Value::Bool(true) {
+        if arg1 == &Value::Bool(true) && arg2 == &Value::Bool(true) {
             return Value::Bool(true);
         } else {
             return Value::Bool(false);
@@ -379,7 +379,7 @@ impl Specialforms {
 
         let arg1 = eval.evaluate(args[0].clone(), scope);
         let arg2 = eval.evaluate(args[1].clone(), scope);
-        if arg1 == Value::Bool(true) || arg2 == Value::Bool(true) {
+        if arg1 == &Value::Bool(true) || arg2 == &Value::Bool(true) {
             return Value::Bool(true);
         } else {
             return Value::Bool(false);
@@ -397,7 +397,7 @@ impl Specialforms {
         }
 
         let arg1 = eval.evaluate(args[0].clone(), scope);
-        if !(arg1 == Value::Bool(true)) {
+        if !(arg1 == &Value::Bool(true)) {
             return Value::Bool(true);
         } else {
             return Value::Bool(false);
