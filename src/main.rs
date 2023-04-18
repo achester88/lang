@@ -94,6 +94,3 @@ fn main() -> Result<(), ()> {
 //cargo build --release --target {}
 
 //top, lk {pid}
-
-//rustup target add x86_64-pc-windows-gnu
-//cargo build --target x86_64-pc-windows-gnu

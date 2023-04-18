@@ -57,19 +57,19 @@ impl<'a> Preprocesser<'a> {
   let expr = self.tokens[i as usize].clone();
   let mut b: i32 = -1;
   let mut p: i32 = -1;
-  if expr.get_value() == &Value::to_stringv("(") {
+  if expr.get_value() == Value::to_stringv("(") {
     self.pc += 1;
     p = i as i32;
   }
-  else if expr.get_value() == &Value::to_stringv(")") {
+  else if expr.get_value() == Value::to_stringv(")") {
     self.pc -= 1;
     p = i as i32;
   }
-  else if expr.get_value() == &Value::to_stringv("{") {
+  else if expr.get_value() == Value::to_stringv("{") {
     self.bc += 1;
     b = i as i32;
   }
-  else if expr.get_value() == &Value::to_stringv("}") {
+  else if expr.get_value() == Value::to_stringv("}") {
     self.bc -= 1;
     b = i as i32;
   }

@@ -20,13 +20,13 @@ impl Dict {
             while i > 0 {
                 let expr = part[i].clone();
                 if !expr.operator.is_none() {
-                    if expr.get_operator().get_value() == &Value::to_stringv("math") {
+                    if expr.get_operator().get_value() == Value::to_stringv("math") {
                         if [
                             Value::to_stringv("*"),
                             Value::to_stringv("/"),
                             Value::to_stringv("%"),
                         ]
-                        .contains(expr.get_value())
+                        .contains(&expr.get_value())
                         {
                             if mdr_op {
                                 op.push(part[i].get_value());
@@ -72,8 +72,8 @@ impl Dict {
         //println!("part: {:#?}", part.clone());
         if part.len() == 1 {
             if !part[0].operator.is_none() {
-                if part[0].get_operator().get_value() == &Value::to_stringv("bool")
-                    || part[0].get_operator().get_operator().get_value() == &Value::to_stringv("comp")
+                if part[0].get_operator().get_value() == Value::to_stringv("bool")
+                    || part[0].get_operator().get_operator().get_value() == Value::to_stringv("comp")
                 {
                     return part[0].clone();
                 }
@@ -84,7 +84,7 @@ impl Dict {
 
         if part.len() == 2 {
             if !part[0].operator.is_none() {
-                if part[0].get_value() == &Value::to_stringv("!") {
+                if part[0].get_value() == Value::to_stringv("!") {
                     return Expr::apply(part[0].clone(), vec![part[1].clone()]);
                 }
             }
@@ -101,10 +101,10 @@ impl Dict {
             //println!("run: {:#?}", part);
             let expr = part[i].clone();
             if !expr.operator.is_none() {
-                if expr.get_operator().get_value() == &Value::to_stringv("comp")
-                    || expr.get_operator().get_value() == &Value::to_stringv("log")
+                if expr.get_operator().get_value() == Value::to_stringv("comp")
+                    || expr.get_operator().get_value() == Value::to_stringv("log")
                 {
-                    if [Value::to_stringv("&&"), Value::to_stringv("||")].contains(expr.get_value()) {
+                    if [Value::to_stringv("&&"), Value::to_stringv("||")].contains(&expr.get_value()) {
                         if ao_op {
                             op.push(part[i].get_value());
                             index.push(i);
@@ -135,7 +135,7 @@ impl Dict {
         } else {
             let mut new_part: Vec<Expr> = Vec::new();
             i = 0;
-            let is_not = [Value::to_stringv("!")].contains(part[l].get_value());
+            let is_not = [Value::to_stringv("!")].contains(&part[l].get_value());
             while i < part.len() {
                 if i == l - 1 {
                     if is_not {
@@ -175,8 +175,8 @@ impl Dict {
             while i > 0 {
                 let expr = part[i].clone();
                 if !expr.operator.is_none() {
-                    if expr.get_operator().get_value() == &Value::to_stringv("math") {
-                        if [Value::to_stringv("*")].contains(expr.get_value()) {
+                    if expr.get_operator().get_value() == Value::to_stringv("math") {
+                        if [Value::to_stringv("*")].contains(&expr.get_value()) {
                             if mdr_op {
                                 op.push(part[i].get_value());
                                 index.push(i);
@@ -187,7 +187,7 @@ impl Dict {
                                 op.push(part[i].get_value());
                                 index.push(i);
                             }
-                        } else if !mdr_op && [Value::to_stringv("+")].contains(expr.get_value()) {
+                        } else if !mdr_op && [Value::to_stringv("+")].contains(&expr.get_value()) {
                             op.push(part[i].get_value());
                             index.push(i);
                         }
@@ -231,7 +231,7 @@ impl Dict {
         if lexed.get_args().len() > 0 {
             list.push(lexed);
         }
-        else if args[2].get_value() == &Value::to_stringv("=") {
+        else if args[2].get_value() == Value::to_stringv("=") {
             list.push(Dict::value_int(args[3..].to_vec()));
         } else {
             println!("Expeted = type at define");
@@ -243,7 +243,7 @@ impl Dict {
     pub fn fnbool(args: Vec<Expr>) -> Expr {
         let mut list: Vec<Expr> = Vec::from([]);
         list.push(args[1].clone());
-        if args[2].get_value() == &Value::to_stringv("=") {
+        if args[2].get_value() == Value::to_stringv("=") {
             list.push(Dict::value_bool(args[3..].to_vec()));
         } else {
             println!("Expeted = type at define");
@@ -256,7 +256,7 @@ impl Dict {
         //println!("s: {:?}", args);
         let mut list: Vec<Expr> = Vec::from([]);
         list.push(args[1].clone());
-        if args[2].get_value() == &Value::to_stringv("=") {
+        if args[2].get_value() == Value::to_stringv("=") {
             list.push(Dict::value_string(args[3..].to_vec()));
         } else {
             println!("Expeted = type at define");

@@ -116,8 +116,8 @@ pub struct Expr {
 */
 
 impl Expr {
-    pub fn get_value(&self) -> &Value {
-        return &self.value;
+    pub fn get_value(&self) -> Value {
+        return self.value.clone();
     }
     pub fn get_type(&self) -> Type {
         return self.type_of.clone();
