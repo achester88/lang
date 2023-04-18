@@ -13,7 +13,7 @@ impl Dict {
             return part[0].clone();
         } else {
             //return part[part.len()/2].clone();
-            let mut op: Vec<Value> = Vec::new();
+            let mut op: Vec<&Value> = Vec::new();
             let mut index: Vec<usize> = Vec::new();
             let mut i = part.len() - 1;
             let mut mdr_op = false;
@@ -92,7 +92,7 @@ impl Dict {
             panic!();
         }
 
-        let mut op: Vec<Value> = Vec::new();
+        let mut op: Vec<&Value> = Vec::new();
         let mut index: Vec<usize> = Vec::new();
         let mut i = part.len() - 1;
         //println!("|{}|",  part.len());
@@ -168,7 +168,7 @@ impl Dict {
             return part[0].clone();
         } else {
             //return part[part.len()/2].clone();
-            let mut op: Vec<Value> = Vec::new();
+            let mut op: Vec<&Value> = Vec::new();
             let mut index: Vec<usize> = Vec::new();
             let mut i = part.len() - 1;
             let mut mdr_op = false;
